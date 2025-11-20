@@ -1,11 +1,39 @@
 import { NavLink } from "./NavLink";
 import { Button } from "./ui/button";
-import { Menu } from "lucide-react";
-import { useState } from "react";
+import { Menu, LogOut, User } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed Out",
+      description: "You have been successfully signed out",
+    });
+    navigate("/");
+  };
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -38,9 +66,24 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <NavLink to="/auth" className="hidden md:inline-block">
-            <Button variant="default">Sign In</Button>
-          </NavLink>
+          {user ? (
+            <>
+              <NavLink to="/dashboard" className="hidden md:inline-block">
+                <Button variant="outline">
+                  <User className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Button>
+              </NavLink>
+              <Button variant="outline" onClick={handleSignOut} className="hidden md:flex">
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <NavLink to="/auth" className="hidden md:inline-block">
+              <Button variant="default">Sign In</Button>
+            </NavLink>
+          )}
 
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -62,11 +105,33 @@ const Header = () => {
                     {link.label}
                   </NavLink>
                 ))}
-                <NavLink to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button variant="default" className="w-full mt-4">
-                    Sign In
-                  </Button>
-                </NavLink>
+                {user ? (
+                  <>
+                    <NavLink to="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full mt-4">
+                        <User className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    </NavLink>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <NavLink to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button variant="default" className="w-full mt-4">
+                      Sign In
+                    </Button>
+                  </NavLink>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
