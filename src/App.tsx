@@ -8,6 +8,11 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Vehicles from "./pages/Vehicles";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import WhyUs from "./pages/WhyUs";
+import Gallery from "./pages/Gallery";
+import Blog from "./pages/Blog";
+import Contact from "./pages/Contact";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -30,6 +35,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/vehicles" element={<Vehicles />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/why-us" element={<WhyUs />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Owner Routes */}
