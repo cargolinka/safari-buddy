@@ -192,6 +192,7 @@ export type Database = {
           daily_rate: number
           features: string[] | null
           id: string
+          image_url: string | null
           inspection_expiry: string
           insurance_expiry: string
           is_compliant: boolean | null
@@ -209,6 +210,7 @@ export type Database = {
           daily_rate: number
           features?: string[] | null
           id?: string
+          image_url?: string | null
           inspection_expiry: string
           insurance_expiry: string
           is_compliant?: boolean | null
@@ -226,6 +228,7 @@ export type Database = {
           daily_rate?: number
           features?: string[] | null
           id?: string
+          image_url?: string | null
           inspection_expiry?: string
           insurance_expiry?: string
           is_compliant?: boolean | null
