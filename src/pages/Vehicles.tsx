@@ -54,7 +54,7 @@ const Vehicles = () => {
         .eq("is_compliant", true);
 
       // Filter by vehicle type if selected
-      if (vehicleType && vehicleType !== "") {
+      if (vehicleType && vehicleType !== "" && vehicleType !== "all") {
         query = query.eq("type", vehicleType as any);
       }
 
@@ -166,7 +166,7 @@ const Vehicles = () => {
                     <SelectValue placeholder="Vehicle Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="land_cruiser">Land Cruiser</SelectItem>
                     <SelectItem value="tour_van">Tour Van</SelectItem>
                     <SelectItem value="bus">Bus</SelectItem>
@@ -221,7 +221,7 @@ const Vehicles = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-2">No vehicles found</h2>
             <p className="text-muted-foreground mb-6">Try adjusting your search criteria</p>
             <Button onClick={() => {
-              setVehicleType("");
+              setVehicleType("all");
               setStartDate(undefined);
               setEndDate(undefined);
               setDestination("");
