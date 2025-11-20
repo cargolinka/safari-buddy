@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +16,23 @@ import heroImage2 from "@/assets/hero-safari-2.jpg";
 import heroImage3 from "@/assets/hero-safari-3.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [vehicleType, setVehicleType] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
 
   const heroImages = [heroImage1, heroImage2, heroImage3];
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (startDate) params.set("startDate", format(startDate, "yyyy-MM-dd"));
+    if (endDate) params.set("endDate", format(endDate, "yyyy-MM-dd"));
+    if (vehicleType) params.set("vehicleType", vehicleType);
+    if (destination) params.set("destination", destination);
+    
+    navigate(`/vehicles?${params.toString()}`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,7 +167,7 @@ const Index = () => {
 
               {/* Search Button */}
               <div className="flex-shrink-0">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
+                <Button onClick={handleSearch} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
                   Search
                 </Button>
               </div>
