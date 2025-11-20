@@ -68,11 +68,10 @@ const Index = () => {
 
         {/* Search Bar */}
         <div className="container mx-auto px-4 -mt-16 relative z-20">
-          <Card className="p-6 shadow-xl bg-card">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Card className="p-4 shadow-xl bg-card">
+            <div className="flex flex-wrap items-end gap-3">
               {/* Start Date */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Start Date</label>
+              <div className="flex-1 min-w-[180px]">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -83,7 +82,7 @@ const Index = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
+                      {startDate ? format(startDate, "PP") : "Start Date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -100,8 +99,7 @@ const Index = () => {
               </div>
 
               {/* End Date */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">End Date</label>
+              <div className="flex-1 min-w-[180px]">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -112,7 +110,7 @@ const Index = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      {endDate ? format(endDate, "PP") : "End Date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -129,11 +127,10 @@ const Index = () => {
               </div>
 
               {/* Vehicle Type */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Vehicle Type</label>
+              <div className="flex-1 min-w-[160px]">
                 <Select value={vehicleType} onValueChange={setVehicleType}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder="Vehicle Type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="land_cruiser">Land Cruiser</SelectItem>
@@ -145,12 +142,11 @@ const Index = () => {
               </div>
 
               {/* Destination */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Start Destination</label>
+              <div className="flex-1 min-w-[200px]">
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Enter destination"
+                    placeholder="Destination"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     className="pl-10"
@@ -159,10 +155,9 @@ const Index = () => {
               </div>
 
               {/* Search Button */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground md:invisible">Search</label>
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Search Vehicles
+              <div className="flex-shrink-0">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
+                  Search
                 </Button>
               </div>
             </div>
