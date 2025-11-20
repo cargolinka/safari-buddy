@@ -13,6 +13,7 @@ import WhyUs from "./pages/WhyUs";
 import Gallery from "./pages/Gallery";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -41,6 +42,9 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
           
           {/* Owner Routes */}
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />
