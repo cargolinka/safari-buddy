@@ -14,6 +14,9 @@ import AddVehicle from "./pages/owner/AddVehicle";
 import VehicleDetails from "./pages/owner/VehicleDetails";
 import OwnerBookings from "./pages/owner/OwnerBookings";
 import OwnerEarnings from "./pages/owner/OwnerEarnings";
+import DriverDashboard from "./pages/driver/DriverDashboard";
+import DriverProfile from "./pages/driver/DriverProfile";
+import DriverTrips from "./pages/driver/DriverTrips";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +40,11 @@ const App = () => (
           <Route path="/owner/vehicles/:id" element={<VehicleDetails />} />
           <Route path="/owner/bookings" element={<OwnerBookings />} />
           <Route path="/owner/earnings" element={<OwnerEarnings />} />
+          
+          {/* Driver Routes */}
+          <Route path="/driver/dashboard" element={<DriverDashboard />} />
+          <Route path="/driver/profile" element={<DriverProfile />} />
+          <Route path="/driver/trips" element={<DriverTrips />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
