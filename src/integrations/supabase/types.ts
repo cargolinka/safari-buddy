@@ -74,6 +74,79 @@ export type Database = {
           },
         ]
       }
+      company_directors: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          full_name: string
+          id: string
+          id_number: string
+          position: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          full_name: string
+          id?: string
+          id_number: string
+          position?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          id_number?: string
+          position?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_directors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_documents: {
+        Row: {
+          company_id: string
+          document_type: string
+          file_path: string
+          id: string
+          uploaded_at: string | null
+          verified_at: string | null
+          verified_by_admin: boolean | null
+        }
+        Insert: {
+          company_id: string
+          document_type: string
+          file_path: string
+          id?: string
+          uploaded_at?: string | null
+          verified_at?: string | null
+          verified_by_admin?: boolean | null
+        }
+        Update: {
+          company_id?: string
+          document_type?: string
+          file_path?: string
+          id?: string
+          uploaded_at?: string | null
+          verified_at?: string | null
+          verified_by_admin?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           document_type: Database["public"]["Enums"]["document_type"]
@@ -104,13 +177,64 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_vehicle_assignments: {
+        Row: {
+          driver_id: string
+          fleet_owner_id: string
+          id: string
+          invited_at: string | null
+          permissions: Json | null
+          responded_at: string | null
+          status: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          driver_id: string
+          fleet_owner_id: string
+          id?: string
+          invited_at?: string | null
+          permissions?: Json | null
+          responded_at?: string | null
+          status?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          driver_id?: string
+          fleet_owner_id?: string
+          id?: string
+          invited_at?: string | null
+          permissions?: Json | null
+          responded_at?: string | null
+          status?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_vehicle_assignments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_vehicle_assignments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           created_at: string
           id: string
+          id_number: string | null
           is_compliant: boolean | null
+          is_vehicle_owner: boolean | null
           license_expiry: string
           license_number: string
+          ntsa_badge_number: string | null
           ntsa_verified: boolean | null
           status: Database["public"]["Enums"]["driver_status"]
           updated_at: string
@@ -118,9 +242,12 @@ export type Database = {
         Insert: {
           created_at?: string
           id: string
+          id_number?: string | null
           is_compliant?: boolean | null
+          is_vehicle_owner?: boolean | null
           license_expiry: string
           license_number: string
+          ntsa_badge_number?: string | null
           ntsa_verified?: boolean | null
           status?: Database["public"]["Enums"]["driver_status"]
           updated_at?: string
@@ -128,9 +255,12 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          id_number?: string | null
           is_compliant?: boolean | null
+          is_vehicle_owner?: boolean | null
           license_expiry?: string
           license_number?: string
+          ntsa_badge_number?: string | null
           ntsa_verified?: boolean | null
           status?: Database["public"]["Enums"]["driver_status"]
           updated_at?: string
@@ -140,25 +270,37 @@ export type Database = {
       profiles: {
         Row: {
           company_name: string | null
+          company_pin: string | null
+          company_registration_number: string | null
           created_at: string
+          entity_type: string | null
           full_name: string
           id: string
+          is_fleet_owner: boolean | null
           phone: string | null
           updated_at: string
         }
         Insert: {
           company_name?: string | null
+          company_pin?: string | null
+          company_registration_number?: string | null
           created_at?: string
+          entity_type?: string | null
           full_name: string
           id: string
+          is_fleet_owner?: boolean | null
           phone?: string | null
           updated_at?: string
         }
         Update: {
           company_name?: string | null
+          company_pin?: string | null
+          company_registration_number?: string | null
           created_at?: string
+          entity_type?: string | null
           full_name?: string
           id?: string
+          is_fleet_owner?: boolean | null
           phone?: string | null
           updated_at?: string
         }
