@@ -374,6 +374,7 @@ export type Database = {
           is_compliant: boolean | null
           model: string
           owner_id: string
+          registration_number: string | null
           road_license_expiry: string
           status: Database["public"]["Enums"]["vehicle_status"]
           tsv_psv_licence_expiry: string | null
@@ -394,6 +395,7 @@ export type Database = {
           is_compliant?: boolean | null
           model: string
           owner_id: string
+          registration_number?: string | null
           road_license_expiry: string
           status?: Database["public"]["Enums"]["vehicle_status"]
           tsv_psv_licence_expiry?: string | null
@@ -414,6 +416,7 @@ export type Database = {
           is_compliant?: boolean | null
           model?: string
           owner_id?: string
+          registration_number?: string | null
           road_license_expiry?: string
           status?: Database["public"]["Enums"]["vehicle_status"]
           tsv_psv_licence_expiry?: string | null
