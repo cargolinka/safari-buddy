@@ -38,6 +38,18 @@ const Dashboard = () => {
 
       if (roleData) {
         setUserRole(roleData.role);
+        
+        // Redirect to role-specific dashboards
+        if (roleData.role === 'admin') {
+          navigate('/admin');
+          return;
+        } else if (roleData.role === 'owner') {
+          navigate('/owner/dashboard');
+          return;
+        } else if (roleData.role === 'driver') {
+          navigate('/driver/dashboard');
+          return;
+        }
       }
 
       setLoading(false);
