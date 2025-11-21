@@ -377,9 +377,9 @@ const Index = () => {
                   onClick={() => navigate("/vehicles")}
                 >
                   <div className="relative h-48 overflow-hidden bg-muted">
-                    {vehicle.image_url ? (
+                    {(vehicle.image_urls?.[0] || vehicle.image_url) ? (
                       <img 
-                        src={vehicle.image_url} 
+                        src={vehicle.image_urls?.[0] || vehicle.image_url} 
                         alt={vehicle.model}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

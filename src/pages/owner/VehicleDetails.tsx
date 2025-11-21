@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, CheckCircle, AlertTriangle, Users, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export default function VehicleDetails() {
   const navigate = useNavigate();
@@ -137,14 +138,32 @@ export default function VehicleDetails() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            {vehicle.image_url && (
+            {(vehicle.image_urls?.length > 0 || vehicle.image_url) && (
               <Card>
                 <CardContent className="p-0">
-                  <img 
-                    src={vehicle.image_url} 
-                    alt={vehicle.model}
-                    className="w-full h-96 object-cover rounded-t-lg"
-                  />
+                  {vehicle.image_urls?.length > 1 ? (
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {vehicle.image_urls.map((url: string, index: number) => (
+                          <CarouselItem key={index}>
+                            <img 
+                              src={url} 
+                              alt={`${vehicle.model} - ${index + 1}`}
+                              className="w-full h-96 object-cover"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="left-4" />
+                      <CarouselNext className="right-4" />
+                    </Carousel>
+                  ) : (
+                    <img 
+                      src={vehicle.image_urls?.[0] || vehicle.image_url} 
+                      alt={vehicle.model}
+                      className="w-full h-96 object-cover rounded-t-lg"
+                    />
+                  )}
                 </CardContent>
               </Card>
             )}

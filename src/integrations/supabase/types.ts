@@ -368,6 +368,7 @@ export type Database = {
           features: string[] | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           inspection_expiry: string
           insurance_expiry: string
           is_compliant: boolean | null
@@ -386,6 +387,7 @@ export type Database = {
           features?: string[] | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           inspection_expiry: string
           insurance_expiry: string
           is_compliant?: boolean | null
@@ -404,6 +406,7 @@ export type Database = {
           features?: string[] | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           inspection_expiry?: string
           insurance_expiry?: string
           is_compliant?: boolean | null

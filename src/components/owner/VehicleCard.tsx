@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Car, Users, Calendar, AlertTriangle, CheckCircle } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface VehicleCardProps {
   vehicle: any;
@@ -56,13 +57,31 @@ export default function VehicleCard({ vehicle, onUpdate }: VehicleCardProps) {
       </CardHeader>
 
       <CardContent>
-        {vehicle.image_url && (
+        {(vehicle.image_urls?.length > 0 || vehicle.image_url) && (
           <div className="mb-4 rounded-md overflow-hidden">
-            <img 
-              src={vehicle.image_url} 
-              alt={vehicle.model}
-              className="w-full h-48 object-cover"
-            />
+            {vehicle.image_urls?.length > 1 ? (
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {vehicle.image_urls.map((url: string, index: number) => (
+                    <CarouselItem key={index}>
+                      <img 
+                        src={url} 
+                        alt={`${vehicle.model} - ${index + 1}`}
+                        className="w-full h-48 object-cover"
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </Carousel>
+            ) : (
+              <img 
+                src={vehicle.image_urls?.[0] || vehicle.image_url} 
+                alt={vehicle.model}
+                className="w-full h-48 object-cover"
+              />
+            )}
           </div>
         )}
 

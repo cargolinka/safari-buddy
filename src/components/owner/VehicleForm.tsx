@@ -35,11 +35,13 @@ interface VehicleFormProps {
 
 const availableFeatures = ["AC", "GPS", "Roof Rack", "4WD", "Backup Camera", "Bluetooth", "USB Charging"];
 
+const MAX_IMAGES = 6;
+
 export default function VehicleForm({ initialData, onSubmit, loading }: VehicleFormProps) {
   const { toast } = useToast();
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(initialData?.features || []);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || "");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(initialData?.image_urls || initialData?.image_url ? [initialData.image_url] : []);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -95,54 +97,85 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
+    const files = Array.from(e.target.files || []);
+    
+    if (imagePreviews.length + files.length > MAX_IMAGES) {
+      toast({
+        title: "Too many images",
+        description: `You can only upload up to ${MAX_IMAGES} images`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
+
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setImagePreviews(prev => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+
+    // Reset input
+    e.target.value = '';
   };
 
-  const uploadImage = async () => {
-    if (!imageFile) return imagePreview;
+  const removeImage = (index: number) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
+  const uploadImages = async () => {
     try {
       setUploading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+      // Keep existing URLs
+      const existingUrls = imagePreviews.filter(url => url.startsWith('http'));
+      
+      // Upload new files
+      const uploadPromises = imageFiles.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('vehicle-images')
-        .upload(fileName, imageFile);
+        const { error: uploadError } = await supabase.storage
+          .from('vehicle-images')
+          .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-images')
-        .getPublicUrl(fileName);
+        const { data: { publicUrl } } = supabase.storage
+          .from('vehicle-images')
+          .getPublicUrl(fileName);
 
-      return publicUrl;
+        return publicUrl;
+      });
+
+      const newUrls = await Promise.all(uploadPromises);
+      return [...existingUrls, ...newUrls];
     } catch (error: any) {
       toast({
-        title: "Error uploading image",
+        title: "Error uploading images",
         description: error.message,
         variant: "destructive",
       });
-      return imagePreview;
+      return imagePreviews.filter(url => url.startsWith('http'));
     } finally {
       setUploading(false);
     }
   };
 
   const onFormSubmit = async (data: VehicleFormData) => {
-    const imageUrl = await uploadImage();
-    await onSubmit({ ...data, image_url: imageUrl });
+    const imageUrls = await uploadImages();
+    await onSubmit({ 
+      ...data, 
+      image_urls: imageUrls,
+      image_url: imageUrls[0] || null // Keep for backward compatibility
+    });
   };
 
   return (
@@ -231,42 +264,58 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
 
       <Card>
         <CardHeader>
-          <CardTitle>Vehicle Image</CardTitle>
+          <CardTitle>Vehicle Images ({imagePreviews.length}/{MAX_IMAGES})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {imagePreview && (
-              <div className="relative">
-                <img src={imagePreview} alt="Vehicle preview" className="w-full h-64 object-cover rounded-md" />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview("");
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img 
+                      src={preview} 
+                      alt={`Vehicle preview ${index + 1}`} 
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    {index === 0 && (
+                      <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
+                        Main
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
-            <div className="flex items-center gap-4">
-              <Input
-                id="image"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              <Label htmlFor="image" className="cursor-pointer">
-                <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent">
-                  <Upload className="h-4 w-4" />
-                  <span>Upload Image</span>
-                </div>
-              </Label>
-            </div>
+            {imagePreviews.length < MAX_IMAGES && (
+              <div className="flex items-center gap-4">
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageChange}
+                  multiple
+                  className="hidden"
+                />
+                <Label htmlFor="images" className="cursor-pointer">
+                  <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent">
+                    <Upload className="h-4 w-4" />
+                    <span>Upload Images ({MAX_IMAGES - imagePreviews.length} remaining)</span>
+                  </div>
+                </Label>
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Upload 4-6 photos from different angles. First image will be the main photo.
+            </p>
           </div>
         </CardContent>
       </Card>
