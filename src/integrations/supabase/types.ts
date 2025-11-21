@@ -453,6 +453,7 @@ export type Database = {
         | "logbook"
         | "driver_license"
         | "ntsa_verification"
+        | "national_id"
       driver_status: "available" | "on_trip" | "unavailable"
       vehicle_status: "available" | "booked" | "maintenance" | "unavailable"
       vehicle_type: "land_cruiser" | "tour_van" | "bus" | "saloon"
@@ -604,6 +605,7 @@ export const Constants = {
         "logbook",
         "driver_license",
         "ntsa_verification",
+        "national_id",
       ],
       driver_status: ["available", "on_trip", "unavailable"],
       vehicle_status: ["available", "booked", "maintenance", "unavailable"],
