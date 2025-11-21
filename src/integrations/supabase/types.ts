@@ -327,6 +327,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_name: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vehicles: {
         Row: {
           capacity: number

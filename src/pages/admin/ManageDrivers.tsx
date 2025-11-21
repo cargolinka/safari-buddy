@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { PendingDriverApprovals } from "@/components/admin/PendingDriverApprovals";
+import { AddDriverDialog } from "@/components/admin/AddDriverDialog";
 
 const ManageDrivers = () => {
   const { toast } = useToast();
@@ -48,9 +49,12 @@ const ManageDrivers = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Manage Drivers</h2>
-        <p className="text-muted-foreground">Review and manage driver registrations</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Manage Drivers</h2>
+          <p className="text-muted-foreground">Review and manage driver registrations</p>
+        </div>
+        <AddDriverDialog onSuccess={fetchDrivers} />
       </div>
 
       <PendingDriverApprovals drivers={pendingDrivers} onUpdate={fetchDrivers} />
