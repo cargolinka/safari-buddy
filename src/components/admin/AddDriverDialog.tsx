@@ -85,7 +85,7 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
-  const uploadDocument = async (file: File, userId: string, docType: 'driver_license' | 'ntsa_verification') => {
+  const uploadDocument = async (file: File, userId: string, docType: 'driver_license' | 'national_id') => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${docType}-${Date.now()}.${fileExt}`;
     
@@ -98,7 +98,7 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
     const { error: docError } = await supabase.from('documents').insert({
       entity_id: userId,
       entity_type: 'driver',
-      document_type: docType as any,
+      document_type: docType,
       file_path: fileName,
     });
 
@@ -133,7 +133,7 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       // Upload documents
       await uploadDocument(licenseFile, data.user_id, 'driver_license');
-      await uploadDocument(idFile, data.user_id, 'driver_license'); // Temporary: using driver_license until national_id is added to enum
+      await uploadDocument(idFile, data.user_id, 'national_id');
 
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: data.user_id,
@@ -205,7 +205,7 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       // Upload documents
       await uploadDocument(licenseFile, newUserId, 'driver_license');
-      await uploadDocument(idFile, newUserId, 'driver_license'); // Temporary: using driver_license until national_id is added to enum
+      await uploadDocument(idFile, newUserId, 'national_id');
 
       // Add driver role
       const { error: roleError } = await supabase.from("user_roles").insert({
