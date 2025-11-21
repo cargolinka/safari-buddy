@@ -21,6 +21,7 @@ const vehicleSchema = z.object({
   insurance_expiry: z.string(),
   inspection_expiry: z.string(),
   road_license_expiry: z.string(),
+  tsv_psv_licence_expiry: z.string().optional(),
   features: z.array(z.string()),
   status: z.enum(["available", "booked", "maintenance", "unavailable"]),
 });
@@ -59,6 +60,7 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
       insurance_expiry: initialData?.insurance_expiry || "",
       inspection_expiry: initialData?.inspection_expiry || "",
       road_license_expiry: initialData?.road_license_expiry || "",
+      tsv_psv_licence_expiry: initialData?.tsv_psv_licence_expiry || "",
       features: initialData?.features || [],
       status: initialData?.status || "available",
     },
@@ -458,6 +460,13 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
             <Label htmlFor="road_license_expiry">Road License Expiry Date *</Label>
             <Input id="road_license_expiry" type="date" {...register("road_license_expiry")} />
             {errors.road_license_expiry && <p className="text-sm text-destructive mt-1">{errors.road_license_expiry.message}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="tsv_psv_licence_expiry">TSV/PSV Licence Expiry Date</Label>
+            <Input id="tsv_psv_licence_expiry" type="date" {...register("tsv_psv_licence_expiry")} />
+            <p className="text-xs text-muted-foreground mt-1">Required for commercial passenger vehicles</p>
+            {errors.tsv_psv_licence_expiry && <p className="text-sm text-destructive mt-1">{errors.tsv_psv_licence_expiry.message}</p>}
           </div>
         </CardContent>
       </Card>

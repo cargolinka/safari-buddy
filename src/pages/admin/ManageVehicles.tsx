@@ -86,7 +86,7 @@ const ManageVehicles = () => {
                 <div key={vehicle.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium">{vehicle.model} ({vehicle.year})</p>
-                    <p className="text-sm text-muted-foreground">Owner: {vehicle.profiles?.full_name}</p>
+                    <p className="text-sm text-muted-foreground">Owner/Authorised Driver: {vehicle.profiles?.full_name}</p>
                     <p className="text-sm text-muted-foreground">Type: {vehicle.type}</p>
                     <p className="text-sm text-muted-foreground">Capacity: {vehicle.capacity}</p>
                   </div>
