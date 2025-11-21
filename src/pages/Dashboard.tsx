@@ -30,10 +30,22 @@ const Dashboard = () => {
       setUser(session.user);
 
       // Fetch all user roles
-      const { data: rolesData } = await supabase
+      const { data: rolesData, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", session.user.id);
+
+      if (error) {
+        console.error("Error fetching user roles:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user roles. Please try logging in again.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        navigate("/auth");
+        return;
+      }
 
       if (rolesData && rolesData.length > 0) {
         // Get primary role (admin > driver > owner > client)
