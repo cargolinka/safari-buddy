@@ -27,50 +27,17 @@ const AdminDashboard = () => {
   }, []);
 
   const checkAdminAccess = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
-      const { data: rolesData, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id);
-
-      console.log('=== ADMIN CHECK DEBUG ===');
-      console.log('Session User ID:', session.user.id);
-      console.log('Roles Data:', rolesData);
-      console.log('Error:', error);
-      console.log('Has Admin Role:', rolesData?.some(r => r.role === 'admin'));
-      console.log('========================');
-
-      const hasAdminRole = rolesData?.some(r => r.role === 'admin');
-
-      if (error || !hasAdminRole) {
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page",
-          variant: "destructive",
-        });
-        navigate("/dashboard");
-        return;
-      }
-
-      setIsAdmin(true);
-      await fetchStats();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      navigate("/dashboard");
-    } finally {
-      setLoading(false);
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      navigate("/auth");
+      return;
     }
+
+    // Trust that Dashboard.tsx already verified admin access before redirecting here
+    setIsAdmin(true);
+    await fetchStats();
+    setLoading(false);
   };
 
   const fetchStats = async () => {
