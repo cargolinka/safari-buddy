@@ -45,6 +45,8 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
@@ -126,6 +128,78 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   const removeImage = (index: number) => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
     setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+
+    if (imagePreviews.length + files.length > MAX_IMAGES) {
+      toast({
+        title: "Too many images",
+        description: `You can only upload up to ${MAX_IMAGES} images`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newPreviews = [...imagePreviews];
+    const draggedItem = newPreviews[draggedIndex];
+    newPreviews.splice(draggedIndex, 1);
+    newPreviews.splice(index, 0, draggedItem);
+
+    const newFiles = [...imageFiles];
+    if (draggedIndex < newFiles.length && index < newFiles.length) {
+      const draggedFile = newFiles[draggedIndex];
+      newFiles.splice(draggedIndex, 1);
+      newFiles.splice(index, 0, draggedFile);
+      setImageFiles(newFiles);
+    }
+
+    setImagePreviews(newPreviews);
+    setDraggedIndex(index);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   const uploadImages = async () => {
@@ -271,11 +345,20 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative group">
+                  <div 
+                    key={index} 
+                    className="relative group cursor-move"
+                    draggable
+                    onDragStart={(e) => handleImageDragStart(e, index)}
+                    onDragOver={(e) => handleImageDragOver(e, index)}
+                    onDragEnd={handleImageDragEnd}
+                  >
                     <img 
                       src={preview} 
                       alt={`Vehicle preview ${index + 1}`} 
-                      className="w-full h-32 object-cover rounded-md"
+                      className={`w-full h-32 object-cover rounded-md transition-all ${
+                        draggedIndex === index ? 'opacity-50 scale-95' : ''
+                      }`}
                     />
                     <Button
                       type="button"
@@ -295,26 +378,40 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
                 ))}
               </div>
             )}
-            {imagePreviews.length < MAX_IMAGES && (
-              <div className="flex items-center gap-4">
-                <Input
-                  id="images"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
-                  multiple
-                  className="hidden"
-                />
-                <Label htmlFor="images" className="cursor-pointer">
-                  <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent">
-                    <Upload className="h-4 w-4" />
-                    <span>Upload Images ({MAX_IMAGES - imagePreviews.length} remaining)</span>
-                  </div>
-                </Label>
-              </div>
-            )}
+            <div 
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <Upload className={`h-12 w-12 mx-auto mb-4 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+              <p className="text-sm font-medium mb-2">
+                {isDragging ? 'Drop images here' : 'Drag and drop images here'}
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">or</p>
+              <Input
+                id="images"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageChange}
+                multiple
+                className="hidden"
+                disabled={imagePreviews.length >= MAX_IMAGES}
+              />
+              <Label htmlFor="images" className={imagePreviews.length >= MAX_IMAGES ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                <div className={`inline-flex items-center gap-2 px-4 py-2 border rounded-md ${
+                  imagePreviews.length >= MAX_IMAGES 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-accent'
+                }`}>
+                  <span>Browse Files ({MAX_IMAGES - imagePreviews.length} remaining)</span>
+                </div>
+              </Label>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Upload 4-6 photos from different angles. First image will be the main photo.
+              Upload 4-6 photos from different angles. Drag images to reorder. First image will be the main photo.
             </p>
           </div>
         </CardContent>
