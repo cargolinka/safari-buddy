@@ -25,7 +25,6 @@ const Auth = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log('Auth - User already logged in, redirecting to dashboard');
         navigate('/dashboard');
       }
     };
