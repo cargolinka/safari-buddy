@@ -35,13 +35,14 @@ const AdminDashboard = () => {
         return;
       }
 
-      const { data: userRole, error } = await supabase
+      const { data: rolesData, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
-        .single();
+        .eq("user_id", session.user.id);
 
-      if (error || userRole?.role !== "admin") {
+      const hasAdminRole = rolesData?.some(r => r.role === 'admin');
+
+      if (error || !hasAdminRole) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to access this page",
