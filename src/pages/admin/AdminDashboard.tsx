@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Car, FileCheck, AlertCircle, TrendingUp } from "lucide-react";
+import { Users, Car, FileCheck, AlertCircle, TrendingUp, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -103,24 +102,45 @@ const AdminDashboard = () => {
     );
   }
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/auth");
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!isAdmin) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <SidebarProvider>
-        <header className="h-12 flex items-center border-b">
-          <SidebarTrigger className="ml-2" />
-          <h1 className="ml-4 text-lg font-semibold">Admin Dashboard</h1>
-        </header>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AdminSidebar />
 
-        <div className="flex min-h-screen w-full">
-          <AdminSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
+            <SidebarTrigger />
+            <h1 className="text-lg font-semibold">Admin Dashboard</h1>
+            <div className="ml-auto">
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </header>
 
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-6">
             {isAdminRoot ? (
               <>
                 <div className="mb-8">
@@ -264,8 +284,8 @@ const AdminDashboard = () => {
             )}
           </main>
         </div>
-      </SidebarProvider>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
