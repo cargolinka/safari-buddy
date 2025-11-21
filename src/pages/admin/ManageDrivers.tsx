@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { PendingDriverApprovals } from "@/components/admin/PendingDriverApprovals";
 import { AddDriverDialog } from "@/components/admin/AddDriverDialog";
+import { EditDriverDialog } from "@/components/admin/EditDriverDialog";
 
 const ManageDrivers = () => {
   const { toast } = useToast();
@@ -70,18 +71,19 @@ const ManageDrivers = () => {
             <div className="space-y-4">
               {drivers.map((driver) => (
                 <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{driver.profiles?.full_name}</p>
                     <p className="text-sm text-muted-foreground">License: {driver.license_number}</p>
                     <p className="text-sm text-muted-foreground">Expiry: {driver.license_expiry}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Badge variant={driver.is_compliant ? "default" : "destructive"}>
                       {driver.is_compliant ? "Compliant" : "Non-compliant"}
                     </Badge>
                     <Badge variant={driver.status === "available" ? "default" : "secondary"}>
                       {driver.status}
                     </Badge>
+                    <EditDriverDialog driver={driver} onSuccess={fetchDrivers} />
                   </div>
                 </div>
               ))}
