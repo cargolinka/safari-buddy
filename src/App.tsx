@@ -23,6 +23,10 @@ import OwnerEarnings from "./pages/owner/OwnerEarnings";
 import DriverDashboard from "./pages/driver/DriverDashboard";
 import DriverProfile from "./pages/driver/DriverProfile";
 import DriverTrips from "./pages/driver/DriverTrips";
+import DriverRegister from "./pages/driver/DriverRegister";
+import PendingInvitations from "./pages/driver/PendingInvitations";
+import CompanySetup from "./pages/owner/CompanySetup";
+import InviteDriver from "./pages/owner/InviteDriver";
 
 const queryClient = new QueryClient();
 
@@ -56,9 +60,15 @@ const App = () => (
           <Route path="/owner/earnings" element={<OwnerEarnings />} />
           
           {/* Driver Routes */}
+          <Route path="/driver/register" element={<DriverRegister />} />
           <Route path="/driver/dashboard" element={<DriverDashboard />} />
           <Route path="/driver/profile" element={<DriverProfile />} />
           <Route path="/driver/trips" element={<DriverTrips />} />
+          <Route path="/driver/invitations" element={<PendingInvitations />} />
+          
+          {/* Owner Additional Routes */}
+          <Route path="/owner/company-setup" element={<CompanySetup />} />
+          <Route path="/owner/invite-driver" element={<InviteDriver />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

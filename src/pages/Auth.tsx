@@ -149,9 +149,8 @@ const Auth = () => {
                       <SelectContent>
                         <SelectItem value="client_individual">Client (Individual)</SelectItem>
                         <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
-                        <SelectItem value="owner">Vehicle Owner</SelectItem>
-                        <SelectItem value="driver">Driver</SelectItem>
-                      </SelectContent>
+                    <SelectItem value="owner">Vehicle Owner</SelectItem>
+                  </SelectContent>
                     </Select>
                   </div>
                 </>
@@ -185,6 +184,22 @@ const Auth = () => {
               </Button>
             </form>
           </Tabs>
+
+          {/* Driver Registration Link */}
+          <div className="mt-6 p-4 border rounded-lg">
+            <h3 className="font-medium mb-2">Are you a Driver?</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Register as a driver with your license and documents
+            </p>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/driver/register')}
+              type="button"
+            >
+              Register as Driver
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
