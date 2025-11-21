@@ -40,6 +40,13 @@ const AdminDashboard = () => {
         .select("role")
         .eq("user_id", session.user.id);
 
+      console.log('=== ADMIN CHECK DEBUG ===');
+      console.log('Session User ID:', session.user.id);
+      console.log('Roles Data:', rolesData);
+      console.log('Error:', error);
+      console.log('Has Admin Role:', rolesData?.some(r => r.role === 'admin'));
+      console.log('========================');
+
       const hasAdminRole = rolesData?.some(r => r.role === 'admin');
 
       if (error || !hasAdminRole) {
