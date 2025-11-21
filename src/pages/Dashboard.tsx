@@ -29,24 +29,33 @@ const Dashboard = () => {
 
       setUser(session.user);
 
-      // Fetch user role
-      const { data: roleData } = await supabase
+      // Fetch all user roles
+      const { data: rolesData } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
-        .single();
+        .eq("user_id", session.user.id);
 
-      if (roleData) {
-        setUserRole(roleData.role);
+      if (rolesData && rolesData.length > 0) {
+        // Get primary role (admin > driver > owner > client)
+        const roles = rolesData.map(r => r.role);
+        let primaryRole = roles[0];
+        
+        if (roles.includes('admin')) primaryRole = 'admin';
+        else if (roles.includes('driver')) primaryRole = 'driver';
+        else if (roles.includes('owner')) primaryRole = 'owner';
+        else if (roles.includes('client_corporate')) primaryRole = 'client_corporate';
+        else if (roles.includes('client_individual')) primaryRole = 'client_individual';
+        
+        setUserRole(primaryRole);
         
         // Redirect to role-specific dashboards
-        if (roleData.role === 'admin') {
+        if (primaryRole === 'admin') {
           navigate('/admin');
           return;
-        } else if (roleData.role === 'owner') {
+        } else if (primaryRole === 'owner') {
           navigate('/owner/dashboard');
           return;
-        } else if (roleData.role === 'driver') {
+        } else if (primaryRole === 'driver') {
           navigate('/driver/dashboard');
           return;
         }
