@@ -88,7 +88,15 @@ const ManageCategories = () => {
               {categories.map((category) => (
                 <div key={category.id} className="p-4 border rounded-lg hover:border-primary transition-colors">
                   <div className="flex items-start gap-3">
-                    {getIconComponent(category.icon_name)}
+                    {category.image_url ? (
+                      <img 
+                        src={category.image_url} 
+                        alt={category.name}
+                        className="h-16 w-16 object-cover rounded-lg"
+                      />
+                    ) : (
+                      getIconComponent(category.icon_name)
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium">{category.name}</h3>

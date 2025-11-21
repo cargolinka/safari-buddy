@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ const categorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
   description: z.string().optional(),
   icon_name: z.string().min(1, "Please select an icon"),
+  image_url: z.string().optional(),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -32,6 +33,8 @@ interface CategoryDialogProps {
 export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(category?.image_url || null);
   const { toast } = useToast();
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<CategoryFormData>({
@@ -40,6 +43,7 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
       name: category.name,
       description: category.description || "",
       icon_name: category.icon_name,
+      image_url: category.image_url || "",
     } : undefined,
   });
 
@@ -48,8 +52,28 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
       setValue("name", category.name);
       setValue("description", category.description || "");
       setValue("icon_name", category.icon_name);
+      setValue("image_url", category.image_url || "");
+      setImagePreview(category.image_url || null);
     }
   }, [category, open, setValue]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setValue("image_url", "");
+  };
 
   const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
@@ -59,6 +83,26 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
     setLoading(true);
     try {
       const slug = generateSlug(data.name);
+      let imageUrl = data.image_url;
+
+      // Upload image if a new file was selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${slug}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('category-images')
+          .upload(filePath, imageFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('category-images')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+      }
 
       if (category) {
         // Update existing category
@@ -69,6 +113,7 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
             slug,
             description: data.description,
             icon_name: data.icon_name,
+            image_url: imageUrl,
           })
           .eq("id", category.id);
 
@@ -81,6 +126,7 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
           slug,
           description: data.description,
           icon_name: data.icon_name,
+          image_url: imageUrl,
         });
 
         if (error) throw error;
@@ -89,6 +135,8 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
 
       setOpen(false);
       reset();
+      setImageFile(null);
+      setImagePreview(null);
       onSuccess();
     } catch (error: any) {
       toast({
@@ -148,6 +196,42 @@ export function CategoryDialog({ onSuccess, category }: CategoryDialogProps) {
             {errors.icon_name && (
               <p className="text-sm text-destructive">{errors.icon_name.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="image">Category Image</Label>
+            {imagePreview && (
+              <div className="relative w-full h-40 rounded-lg overflow-hidden border">
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={removeImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('image')?.click()}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {imagePreview ? "Change Image" : "Upload Image"}
+              </Button>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
