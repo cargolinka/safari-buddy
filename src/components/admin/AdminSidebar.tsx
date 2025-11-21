@@ -1,4 +1,4 @@
-import { Users, Car, Building2, FolderTree } from "lucide-react";
+import { Users, Car, Building2, FolderTree, TrendingUp } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const adminMenuItems = [
   { title: "Vehicles", url: "/admin/vehicles", icon: Car },
   { title: "Fleet Owners", url: "/admin/fleet-owners", icon: Building2 },
   { title: "Vehicle Categories", url: "/admin/categories", icon: FolderTree },
+  { title: "Analytics", url: "/admin/analytics", icon: TrendingUp },
 ];
 
 export function AdminSidebar() {
