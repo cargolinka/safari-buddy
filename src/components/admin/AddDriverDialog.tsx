@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -38,6 +38,8 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"existing" | "new">("existing");
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [idFile, setIdFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const existingUserForm = useForm<ExistingUserFormData>({
@@ -83,9 +85,40 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
+  const uploadDocument = async (file: File, userId: string, docType: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${docType}-${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('driver-documents')
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { error: docError } = await supabase.from('documents').insert({
+      entity_id: userId,
+      entity_type: 'driver',
+      document_type: docType,
+      file_path: fileName,
+    });
+
+    if (docError) throw docError;
+  };
+
   const onSubmitExisting = async (data: ExistingUserFormData) => {
     setLoading(true);
     try {
+      // Validate required documents
+      if (!licenseFile || !idFile) {
+        toast({
+          title: "Missing Documents",
+          description: "Please upload both driver's license and national ID",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error: driverError } = await supabase.from("drivers").insert({
         id: data.user_id,
         license_number: data.license_number,
@@ -98,6 +131,10 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       if (driverError) throw driverError;
 
+      // Upload documents
+      await uploadDocument(licenseFile, data.user_id, 'drivers_license');
+      await uploadDocument(idFile, data.user_id, 'national_id');
+
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: data.user_id,
         role: "driver",
@@ -107,10 +144,12 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       toast({
         title: "Success",
-        description: "Driver added successfully",
+        description: "Driver added successfully with documents",
       });
       setOpen(false);
       existingUserForm.reset();
+      setLicenseFile(null);
+      setIdFile(null);
       onSuccess();
     } catch (error: any) {
       toast({
@@ -126,6 +165,17 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
   const onSubmitNew = async (data: NewUserFormData) => {
     setLoading(true);
     try {
+      // Validate required documents
+      if (!licenseFile || !idFile) {
+        toast({
+          title: "Missing Documents",
+          description: "Please upload both driver's license and national ID",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       // Generate a UUID for the new profile
       const newUserId = crypto.randomUUID();
       
@@ -153,6 +203,10 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       if (driverError) throw driverError;
 
+      // Upload documents
+      await uploadDocument(licenseFile, newUserId, 'drivers_license');
+      await uploadDocument(idFile, newUserId, 'national_id');
+
       // Add driver role
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: newUserId,
@@ -163,10 +217,12 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
 
       toast({
         title: "Success",
-        description: "Driver profile created successfully",
+        description: "Driver profile created successfully with documents",
       });
       setOpen(false);
       newUserForm.reset();
+      setLicenseFile(null);
+      setIdFile(null);
       onSuccess();
     } catch (error: any) {
       toast({
@@ -248,6 +304,38 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
                 <Input {...existingUserForm.register("ntsa_badge_number")} placeholder="Enter NTSA badge number" />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="license_doc">Driver's License Document *</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setLicenseFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                {licenseFile && (
+                  <p className="text-sm text-muted-foreground">{licenseFile.name}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="id_doc">National ID Document *</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setIdFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                {idFile && (
+                  <p className="text-sm text-muted-foreground">{idFile.name}</p>
+                )}
+              </div>
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Adding..." : "Add Driver"}
               </Button>
@@ -307,6 +395,38 @@ export function AddDriverDialog({ onSuccess }: { onSuccess: () => void }) {
               <div className="space-y-2">
                 <Label htmlFor="ntsa_badge_number">NTSA Badge Number (Optional)</Label>
                 <Input {...newUserForm.register("ntsa_badge_number")} placeholder="Enter NTSA badge number" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="license_doc">Driver's License Document *</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setLicenseFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                {licenseFile && (
+                  <p className="text-sm text-muted-foreground">{licenseFile.name}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="id_doc">National ID Document *</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setIdFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                {idFile && (
+                  <p className="text-sm text-muted-foreground">{idFile.name}</p>
+                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
