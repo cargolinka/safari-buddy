@@ -14,6 +14,10 @@ import Gallery from "./pages/Gallery";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageDrivers from "./pages/admin/ManageDrivers";
+import ManageVehicles from "./pages/admin/ManageVehicles";
+import ManageFleetOwners from "./pages/admin/ManageFleetOwners";
+import ManageCategories from "./pages/admin/ManageCategories";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -48,7 +52,12 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route path="drivers" element={<ManageDrivers />} />
+              <Route path="vehicles" element={<ManageVehicles />} />
+              <Route path="fleet-owners" element={<ManageFleetOwners />} />
+              <Route path="categories" element={<ManageCategories />} />
+            </Route>
           
           {/* Owner Routes */}
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />
