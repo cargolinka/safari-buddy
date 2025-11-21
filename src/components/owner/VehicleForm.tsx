@@ -14,6 +14,7 @@ import { Upload, X } from "lucide-react";
 
 const vehicleSchema = z.object({
   model: z.string().min(1, "Model is required"),
+  registration_number: z.string().min(1, "Registration number is required").toUpperCase(),
   type: z.string().min(1, "Vehicle type is required"),
   year: z.number().min(1900).max(new Date().getFullYear() + 1),
   capacity: z.number().min(1).max(100),
@@ -53,6 +54,7 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
     resolver: zodResolver(vehicleSchema),
     defaultValues: {
       model: initialData?.model || "",
+      registration_number: initialData?.registration_number || "",
       type: initialData?.type || "",
       year: initialData?.year || new Date().getFullYear(),
       capacity: initialData?.capacity || 5,
@@ -265,6 +267,17 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
             <Label htmlFor="model">Vehicle Model *</Label>
             <Input id="model" {...register("model")} placeholder="e.g., Toyota Land Cruiser" />
             {errors.model && <p className="text-sm text-destructive mt-1">{errors.model.message}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="registration_number">Registration Number (Plate) *</Label>
+            <Input 
+              id="registration_number" 
+              {...register("registration_number")} 
+              placeholder="e.g., KAA 123A" 
+              className="uppercase"
+            />
+            {errors.registration_number && <p className="text-sm text-destructive mt-1">{errors.registration_number.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

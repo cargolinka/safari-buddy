@@ -43,7 +43,12 @@ export default function VehicleCard({ vehicle, onUpdate }: VehicleCardProps) {
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start mb-2">
-          <CardTitle className="text-xl">{vehicle.model}</CardTitle>
+          <div>
+            <CardTitle className="text-xl">{vehicle.model}</CardTitle>
+            {vehicle.registration_number && (
+              <p className="text-sm font-mono text-primary mt-1">{vehicle.registration_number}</p>
+            )}
+          </div>
           <Badge variant={getStatusColor(vehicle.status)}>
             {vehicle.status}
           </Badge>
