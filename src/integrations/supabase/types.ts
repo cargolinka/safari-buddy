@@ -333,6 +333,7 @@ export type Database = {
           description: string | null
           icon_name: string
           id: string
+          image_url: string | null
           name: string
           slug: string
           updated_at: string
@@ -342,6 +343,7 @@ export type Database = {
           description?: string | null
           icon_name?: string
           id?: string
+          image_url?: string | null
           name: string
           slug: string
           updated_at?: string
@@ -351,6 +353,7 @@ export type Database = {
           description?: string | null
           icon_name?: string
           id?: string
+          image_url?: string | null
           name?: string
           slug?: string
           updated_at?: string
