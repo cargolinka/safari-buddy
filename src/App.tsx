@@ -19,6 +19,7 @@ import ManageVehicles from "./pages/admin/ManageVehicles";
 import ManageFleetOwners from "./pages/admin/ManageFleetOwners";
 import ManageCategories from "./pages/admin/ManageCategories";
 import Analytics from "./pages/admin/Analytics";
+import ComplianceMonitoring from "./pages/admin/ComplianceMonitoring";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="fleet-owners" element={<ManageFleetOwners />} />
               <Route path="categories" element={<ManageCategories />} />
               <Route path="analytics" element={<Analytics />} />
+              <Route path="compliance" element={<ComplianceMonitoring />} />
             </Route>
           
           {/* Owner Routes */}
