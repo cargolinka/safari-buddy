@@ -14,7 +14,7 @@ import { Upload, X } from "lucide-react";
 
 const vehicleSchema = z.object({
   model: z.string().min(1, "Model is required"),
-  type: z.enum(["sedan", "suv", "van", "minibus", "bus"]),
+  type: z.string().min(1, "Vehicle type is required"),
   year: z.number().min(1900).max(new Date().getFullYear() + 1),
   capacity: z.number().min(1).max(100),
   daily_rate: z.number().min(0),
@@ -41,12 +41,14 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || "");
   const [uploading, setUploading] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: {
       model: initialData?.model || "",
-      type: initialData?.type || "sedan",
+      type: initialData?.type || "",
       year: initialData?.year || new Date().getFullYear(),
       capacity: initialData?.capacity || 5,
       daily_rate: initialData?.daily_rate || 0,
@@ -59,6 +61,30 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   });
 
   const vehicleType = watch("type");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('vehicle_categories')
+          .select('id, name, slug')
+          .order('name');
+        
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error: any) {
+        toast({
+          title: "Error loading categories",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, [toast]);
 
   const handleFeatureToggle = (feature: string) => {
     const updated = selectedFeatures.includes(feature)
@@ -135,16 +161,20 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">Vehicle Type *</Label>
-              <Select onValueChange={(value: any) => setValue("type", value)} defaultValue={vehicleType}>
+              <Select 
+                onValueChange={(value: any) => setValue("type", value)} 
+                defaultValue={vehicleType}
+                disabled={loadingCategories}
+              >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={loadingCategories ? "Loading..." : "Select vehicle type"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sedan">Sedan</SelectItem>
-                  <SelectItem value="suv">SUV</SelectItem>
-                  <SelectItem value="van">Van</SelectItem>
-                  <SelectItem value="minibus">Minibus</SelectItem>
-                  <SelectItem value="bus">Bus</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.slug}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {errors.type && <p className="text-sm text-destructive mt-1">{errors.type.message}</p>}
