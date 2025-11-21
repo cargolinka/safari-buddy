@@ -38,12 +38,21 @@ const Dashboard = () => {
       if (error) {
         console.error("Error fetching user roles:", error);
         toast({
-          title: "Error",
-          description: "Failed to load user roles. Please try logging in again.",
+          title: "Error Loading Roles",
+          description: `Failed to load user roles: ${error.message}`,
           variant: "destructive",
         });
-        await supabase.auth.signOut();
-        navigate("/auth");
+        setLoading(false);
+        return;
+      }
+
+      if (!rolesData || rolesData.length === 0) {
+        toast({
+          title: "No Role Assigned",
+          description: "Your account doesn't have any roles assigned yet. Please contact an administrator.",
+          variant: "destructive",
+        });
+        setLoading(false);
         return;
       }
 
