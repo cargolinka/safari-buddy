@@ -35,6 +35,11 @@ const Dashboard = () => {
         .select("role")
         .eq("user_id", session.user.id);
 
+      console.log('Dashboard - Roles data:', {
+        rolesData,
+        roles: rolesData?.map(r => r.role)
+      });
+
       if (rolesData && rolesData.length > 0) {
         // Get primary role (admin > driver > owner > client)
         const roles = rolesData.map(r => r.role);
@@ -46,10 +51,12 @@ const Dashboard = () => {
         else if (roles.includes('client_corporate')) primaryRole = 'client_corporate';
         else if (roles.includes('client_individual')) primaryRole = 'client_individual';
         
+        console.log('Dashboard - Primary role:', primaryRole);
         setUserRole(primaryRole);
         
         // Redirect to role-specific dashboards
         if (primaryRole === 'admin') {
+          console.log('Dashboard - Redirecting admin to /admin');
           navigate('/admin');
           return;
         } else if (primaryRole === 'owner') {
