@@ -1,4 +1,4 @@
-import { Users, Car, Building2, FolderTree, TrendingUp, Shield } from "lucide-react";
+import { Users, Car, Building2, FolderTree, TrendingUp, Shield, ClipboardCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const adminMenuItems = [
+  { title: "Pending Approvals", url: "/admin/approvals", icon: ClipboardCheck },
   { title: "Manage Drivers", url: "/admin/drivers", icon: Users },
   { title: "Vehicles", url: "/admin/vehicles", icon: Car },
   { title: "Fleet Owners", url: "/admin/fleet-owners", icon: Building2 },
