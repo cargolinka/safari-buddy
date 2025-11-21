@@ -376,6 +376,7 @@ export type Database = {
           owner_id: string
           road_license_expiry: string
           status: Database["public"]["Enums"]["vehicle_status"]
+          tsv_psv_licence_expiry: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at: string
           year: number
@@ -395,6 +396,7 @@ export type Database = {
           owner_id: string
           road_license_expiry: string
           status?: Database["public"]["Enums"]["vehicle_status"]
+          tsv_psv_licence_expiry?: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string
           year: number
@@ -414,6 +416,7 @@ export type Database = {
           owner_id?: string
           road_license_expiry?: string
           status?: Database["public"]["Enums"]["vehicle_status"]
+          tsv_psv_licence_expiry?: string | null
           type?: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string
           year?: number

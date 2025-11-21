@@ -51,7 +51,7 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
     if (!selectedOwnerId) {
       toast({
         title: "Error",
-        description: "Please select a vehicle owner",
+        description: "Please select an owner or authorised driver",
         variant: "destructive",
       });
       return;
@@ -98,10 +98,10 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="owner">Vehicle Owner</Label>
+            <Label htmlFor="owner">Owner/Authorised Driver</Label>
             <Select value={selectedOwnerId} onValueChange={setSelectedOwnerId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select owner" />
+                <SelectValue placeholder="Select owner/authorised driver" />
               </SelectTrigger>
               <SelectContent>
                 {owners.map((owner) => (
