@@ -25,6 +25,7 @@ interface Vehicle {
   features: string[] | null;
   status: string;
   is_compliant: boolean;
+  registration_number: string | null;
 }
 
 const Vehicles = () => {
@@ -252,7 +253,14 @@ const Vehicles = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-xl">{vehicle.model}</CardTitle>
-                        <CardDescription>{vehicle.year}</CardDescription>
+                        <CardDescription className="space-y-1">
+                          <div>{vehicle.year}</div>
+                          {vehicle.registration_number && (
+                            <div className="font-mono text-primary font-medium">
+                              {vehicle.registration_number}
+                            </div>
+                          )}
+                        </CardDescription>
                       </div>
                       <Badge variant="secondary">{formatVehicleType(vehicle.type)}</Badge>
                     </div>
