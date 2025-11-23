@@ -1,6 +1,6 @@
 import { NavLink } from "./NavLink";
 import { Button } from "./ui/button";
-import { Menu, LogOut, User } from "lucide-react";
+import { Menu, LogOut, Car, User, Building } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,22 +67,31 @@ const Header = () => {
 
         <div className="flex items-center gap-4">
           {user ? (
-            <>
-              <NavLink to="/dashboard" className="hidden md:inline-block">
-                <Button variant="outline">
-                  <User className="w-4 h-4 mr-2" />
-                  Dashboard
+            <Button variant="outline" onClick={handleSignOut} className="hidden md:flex">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <NavLink to="/auth?role=driver">
+                <Button variant="outline" size="sm">
+                  <Car className="w-4 h-4 mr-2" />
+                  Driver
                 </Button>
               </NavLink>
-              <Button variant="outline" onClick={handleSignOut} className="hidden md:flex">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <NavLink to="/auth" className="hidden md:inline-block">
-              <Button variant="default">Sign In</Button>
-            </NavLink>
+              <NavLink to="/auth?role=client_individual">
+                <Button variant="outline" size="sm">
+                  <User className="w-4 h-4 mr-2" />
+                  Client
+                </Button>
+              </NavLink>
+              <NavLink to="/auth?role=owner">
+                <Button variant="outline" size="sm">
+                  <Building className="w-4 h-4 mr-2" />
+                  Vehicle Owner
+                </Button>
+              </NavLink>
+            </div>
           )}
 
           {/* Mobile Navigation */}
@@ -106,31 +115,38 @@ const Header = () => {
                   </NavLink>
                 ))}
                 {user ? (
-                  <>
-                    <NavLink to="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full mt-4">
-                        <User className="w-4 h-4 mr-2" />
-                        Dashboard
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={() => {
+                      handleSignOut();
+                      setIsOpen(false);
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <div className="space-y-2 mt-4">
+                    <NavLink to="/auth?role=driver" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        <Car className="w-4 h-4 mr-2" />
+                        Driver Login
                       </Button>
                     </NavLink>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        handleSignOut();
-                        setIsOpen(false);
-                      }}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </>
-                ) : (
-                  <NavLink to="/auth" onClick={() => setIsOpen(false)}>
-                    <Button variant="default" className="w-full mt-4">
-                      Sign In
-                    </Button>
-                  </NavLink>
+                    <NavLink to="/auth?role=client_individual" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        <User className="w-4 h-4 mr-2" />
+                        Client Login
+                      </Button>
+                    </NavLink>
+                    <NavLink to="/auth?role=owner" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        <Building className="w-4 h-4 mr-2" />
+                        Vehicle Owner Login
+                      </Button>
+                    </NavLink>
+                  </div>
                 )}
               </nav>
             </SheetContent>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { COUNTRIES } from "@/lib/countries";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -22,6 +23,7 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState<string>("");
+  const preSelectedRole = searchParams.get("role");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -33,6 +35,12 @@ const Auth = () => {
     
     checkSession();
   }, [navigate]);
+
+  useEffect(() => {
+    if (preSelectedRole) {
+      setRole(preSelectedRole);
+    }
+  }, [preSelectedRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,13 +130,27 @@ const Auth = () => {
     }
   };
 
+  const getRoleTitle = () => {
+    if (preSelectedRole === "driver") return "Driver Portal";
+    if (preSelectedRole === "owner") return "Vehicle Owner Portal";
+    if (preSelectedRole === "client_individual") return "Client Portal";
+    return "Welcome";
+  };
+
+  const getRoleDescription = () => {
+    if (preSelectedRole === "driver") return "Sign in to manage your trips and assignments";
+    if (preSelectedRole === "owner") return "Sign in to manage your fleet and vehicles";
+    if (preSelectedRole === "client_individual") return "Sign in to book vehicles and manage reservations";
+    return "Sign in to your account or create a new one";
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Welcome</CardTitle>
+          <CardTitle className="text-2xl">{getRoleTitle()}</CardTitle>
           <CardDescription>
-            Sign in to your account or create a new one
+            {getRoleDescription()}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -181,16 +203,22 @@ const Auth = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="role">I am a...</Label>
-                    <Select value={role} onValueChange={setRole} required>
+                    <Select value={role} onValueChange={setRole} required disabled={!!preSelectedRole}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="client_individual">Client (Individual)</SelectItem>
                         <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
-                    <SelectItem value="owner">Vehicle Owner</SelectItem>
-                  </SelectContent>
+                        <SelectItem value="owner">Vehicle Owner</SelectItem>
+                        <SelectItem value="driver">Driver</SelectItem>
+                      </SelectContent>
                     </Select>
+                    {preSelectedRole && (
+                      <p className="text-xs text-muted-foreground">
+                        Role pre-selected. To change, visit the sign up page.
+                      </p>
+                    )}
                   </div>
                 </>
               )}
