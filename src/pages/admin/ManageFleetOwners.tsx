@@ -130,9 +130,34 @@ const ManageFleetOwners = () => {
 
       if (error) throw error;
 
+      // Send email notification
+      try {
+        const emailData = {
+          ownerEmail: ownerToSuspend.email,
+          ownerName: ownerToSuspend.entity_type === "company" 
+            ? ownerToSuspend.company_name 
+            : ownerToSuspend.full_name,
+          isSuspension: newStatus === "suspended",
+          suspensionReason: newStatus === "suspended" ? suspensionReason : undefined,
+          suspensionNotes: newStatus === "suspended" ? suspensionNotes : undefined,
+          suspendedAt: newStatus === "suspended" ? new Date().toISOString() : undefined,
+        };
+
+        const { error: emailError } = await supabase.functions.invoke("send-suspension-email", {
+          body: emailData,
+        });
+
+        if (emailError) {
+          console.error("Failed to send email:", emailError);
+          // Don't block the suspension, just log the error
+        }
+      } catch (emailError) {
+        console.error("Email notification error:", emailError);
+      }
+
       toast({
         title: newStatus === "suspended" ? "Account Suspended" : "Account Activated",
-        description: `Fleet owner account has been ${newStatus === "suspended" ? "suspended" : "activated"} successfully.`,
+        description: `Fleet owner account has been ${newStatus === "suspended" ? "suspended" : "activated"} successfully. Email notification sent.`,
       });
 
       fetchFleetOwners();
