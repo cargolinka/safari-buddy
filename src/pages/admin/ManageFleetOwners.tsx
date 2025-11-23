@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRIES } from "@/lib/countries";
 
 const ManageFleetOwners = () => {
   const { toast } = useToast();
   const [owners, setOwners] = useState<any[]>([]);
   const [pendingCompanies, setPendingCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
 
   useEffect(() => {
     fetchFleetOwners();
@@ -57,6 +60,14 @@ const ManageFleetOwners = () => {
     }
   };
 
+  const filteredOwners = selectedCountry === "all"
+    ? owners
+    : owners.filter(o => o.country === selectedCountry);
+
+  const filteredPendingCompanies = selectedCountry === "all"
+    ? pendingCompanies
+    : pendingCompanies.filter(c => c.country === selectedCountry);
+
   return (
     <div className="space-y-6">
       <div>
@@ -64,7 +75,23 @@ const ManageFleetOwners = () => {
         <p className="text-muted-foreground">Manage fleet owners and companies</p>
       </div>
 
-      <PendingCompanyApprovals companies={pendingCompanies} onUpdate={fetchFleetOwners} />
+      <div className="flex items-center gap-4">
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by country" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Countries</SelectItem>
+            {COUNTRIES.map((country) => (
+              <SelectItem key={country.code} value={country.name}>
+                {country.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <PendingCompanyApprovals companies={filteredPendingCompanies} onUpdate={fetchFleetOwners} />
 
       <Card>
         <CardHeader>
@@ -75,7 +102,7 @@ const ManageFleetOwners = () => {
             <div>Loading...</div>
           ) : (
             <div className="space-y-4">
-              {owners.map((owner) => (
+              {filteredOwners.map((owner) => (
                 <div key={owner.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <p className="font-medium">

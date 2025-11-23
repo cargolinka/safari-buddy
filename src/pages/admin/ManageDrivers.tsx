@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { PendingDriverApprovals } from "@/components/admin/PendingDriverApprovals";
 import { AddDriverDialog } from "@/components/admin/AddDriverDialog";
 import { EditDriverDialog } from "@/components/admin/EditDriverDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRIES } from "@/lib/countries";
 
 const ManageDrivers = () => {
   const { toast } = useToast();
   const [drivers, setDrivers] = useState<any[]>([]);
   const [pendingDrivers, setPendingDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
 
   useEffect(() => {
     fetchDrivers();
@@ -48,6 +51,14 @@ const ManageDrivers = () => {
     }
   };
 
+  const filteredDrivers = selectedCountry === "all" 
+    ? drivers 
+    : drivers.filter(d => d.profiles?.country === selectedCountry);
+
+  const filteredPendingDrivers = selectedCountry === "all"
+    ? pendingDrivers
+    : pendingDrivers.filter(d => d.profiles?.country === selectedCountry);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -58,7 +69,23 @@ const ManageDrivers = () => {
         <AddDriverDialog onSuccess={fetchDrivers} />
       </div>
 
-      <PendingDriverApprovals drivers={pendingDrivers} onUpdate={fetchDrivers} />
+      <div className="flex items-center gap-4">
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by country" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Countries</SelectItem>
+            {COUNTRIES.map((country) => (
+              <SelectItem key={country.code} value={country.name}>
+                {country.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <PendingDriverApprovals drivers={filteredPendingDrivers} onUpdate={fetchDrivers} />
 
       <Card>
         <CardHeader>
@@ -69,7 +96,7 @@ const ManageDrivers = () => {
             <div>Loading...</div>
           ) : (
             <div className="space-y-4">
-              {drivers.map((driver) => (
+              {filteredDrivers.map((driver) => (
                 <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium">{driver.profiles?.full_name}</p>
