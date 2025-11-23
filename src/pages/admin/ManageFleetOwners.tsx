@@ -265,6 +265,10 @@ const ManageFleetOwners = () => {
                       : ownerToSuspend?.full_name}
                   </strong>
                   ? They will regain access to their account and all features.
+                  <br /><br />
+                  <span className="text-sm">
+                    ✓ All compliant vehicles will automatically be restored to available status
+                  </span>
                 </>
               ) : (
                 <>
@@ -275,7 +279,10 @@ const ManageFleetOwners = () => {
                       : ownerToSuspend?.full_name}
                   </strong>
                   ? They will be logged out and unable to access their account until reactivated.
-                  Their vehicles will also become unavailable.
+                  <br /><br />
+                  <span className="text-sm font-medium text-destructive">
+                    ⚠ All their vehicles will automatically be marked as unavailable
+                  </span>
                 </>
               )}
             </AlertDialogDescription>
