@@ -367,6 +367,10 @@ export type Database = {
           id: string
           is_fleet_owner: boolean | null
           phone: string | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_notes: string | null
+          suspension_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -382,6 +386,10 @@ export type Database = {
           id: string
           is_fleet_owner?: boolean | null
           phone?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_notes?: string | null
+          suspension_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -397,6 +405,10 @@ export type Database = {
           id?: string
           is_fleet_owner?: boolean | null
           phone?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_notes?: string | null
+          suspension_reason?: string | null
           updated_at?: string
         }
         Relationships: []
