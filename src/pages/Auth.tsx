@@ -223,10 +223,23 @@ const Auth = () => {
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="client_individual">Client (Individual)</SelectItem>
-                        <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
-                        <SelectItem value="owner">Vehicle Owner</SelectItem>
-                        <SelectItem value="driver">Driver</SelectItem>
+                        {(preSelectedRole === "client_individual" || preSelectedRole === "client_corporate") ? (
+                          <>
+                            <SelectItem value="client_individual">Client (Individual)</SelectItem>
+                            <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
+                          </>
+                        ) : preSelectedRole === "driver" ? (
+                          <SelectItem value="driver">Driver</SelectItem>
+                        ) : preSelectedRole === "owner" ? (
+                          <SelectItem value="owner">Vehicle Owner</SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="client_individual">Client (Individual)</SelectItem>
+                            <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
+                            <SelectItem value="owner">Vehicle Owner</SelectItem>
+                            <SelectItem value="driver">Driver</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
