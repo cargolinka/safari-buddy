@@ -52,6 +52,133 @@ export type Database = {
           },
         ]
       }
+      bid_requests: {
+        Row: {
+          budget_range_max: number | null
+          budget_range_min: number | null
+          client_id: string
+          created_at: string
+          description: string
+          destination: string
+          expires_at: string | null
+          id: string
+          origin: string
+          passengers: number
+          pickup_date: string
+          pickup_time: string
+          return_date: string | null
+          return_time: string | null
+          status: string
+          title: string
+          updated_at: string
+          vehicle_type: string | null
+          with_driver: boolean
+        }
+        Insert: {
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          client_id: string
+          created_at?: string
+          description: string
+          destination: string
+          expires_at?: string | null
+          id?: string
+          origin: string
+          passengers: number
+          pickup_date: string
+          pickup_time: string
+          return_date?: string | null
+          return_time?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vehicle_type?: string | null
+          with_driver?: boolean
+        }
+        Update: {
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          client_id?: string
+          created_at?: string
+          description?: string
+          destination?: string
+          expires_at?: string | null
+          id?: string
+          origin?: string
+          passengers?: number
+          pickup_date?: string
+          pickup_time?: string
+          return_date?: string | null
+          return_time?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vehicle_type?: string | null
+          with_driver?: boolean
+        }
+        Relationships: []
+      }
+      bids: {
+        Row: {
+          bid_amount: number
+          bid_request_id: string
+          bidder_id: string
+          created_at: string
+          driver_id: string | null
+          id: string
+          message: string | null
+          status: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          bid_amount: number
+          bid_request_id: string
+          bidder_id: string
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          bid_amount?: number
+          bid_request_id?: string
+          bidder_id?: string
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_bid_request_id_fkey"
+            columns: ["bid_request_id"]
+            isOneToOne: false
+            referencedRelation: "bid_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           client_id: string

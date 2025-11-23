@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Car, Calendar, DollarSign, LogOut, AlertTriangle, CheckCircle, MapPin } from "lucide-react";
+import { Car, Calendar, DollarSign, LogOut, AlertTriangle, CheckCircle, MapPin, Gavel } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function DriverDashboard() {
@@ -266,7 +266,7 @@ export default function DriverDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-4 mb-8">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/driver/trips")}>
             <CardHeader>
               <CardTitle>My Trips</CardTitle>
@@ -281,6 +281,16 @@ export default function DriverDashboard() {
                 <CardTitle>Empty Legs</CardTitle>
               </div>
               <CardDescription>Offer discounted empty return journeys</CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/driver/bid-requests")}>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Gavel className="h-5 w-5 text-primary" />
+                <CardTitle>Bid Requests</CardTitle>
+              </div>
+              <CardDescription>Browse and bid on client trip requests</CardDescription>
             </CardHeader>
           </Card>
 

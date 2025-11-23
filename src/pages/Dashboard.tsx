@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { Gavel, MapPin } from "lucide-react";
 
 interface UserRole {
   role: string;
@@ -236,7 +237,7 @@ const Dashboard = () => {
 
           {(userRole === "client_individual" || userRole === "client_corporate") && (
             <>
-              <Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/vehicles")}>
                 <CardHeader>
                   <CardTitle>Browse Vehicles</CardTitle>
                   <CardDescription>Find your perfect ride</CardDescription>
@@ -246,6 +247,51 @@ const Dashboard = () => {
                     Search and book safari vehicles
                   </p>
                   <Button className="w-full">Browse Now</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/empty-legs")}>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                    <CardTitle>Empty Legs</CardTitle>
+                  </div>
+                  <CardDescription>Discounted return trips</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Save up to 50% on empty return journeys
+                  </p>
+                  <Button className="w-full" variant="outline">View Deals</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/client/create-bid-request")}>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Gavel className="h-5 w-5 text-primary" />
+                    <CardTitle>Request Bids</CardTitle>
+                  </div>
+                  <CardDescription>Get competitive offers</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Post your trip and receive bids from drivers
+                  </p>
+                  <Button className="w-full">Create Request</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/client/bid-requests")}>
+                <CardHeader>
+                  <CardTitle>My Bid Requests</CardTitle>
+                  <CardDescription>Manage your requests</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    View and manage your active bid requests
+                  </p>
+                  <Button className="w-full" variant="outline">View Requests</Button>
                 </CardContent>
               </Card>
 

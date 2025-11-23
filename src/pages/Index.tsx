@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building, DollarSign } from "lucide-react";
+import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building, DollarSign, Gavel, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -542,6 +542,80 @@ const Index = () => {
                 <Link to="/empty-legs">
                   <MapPin className="w-5 h-5 mr-2" />
                   Browse Empty Legs
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bid Request Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-primary">
+                <Gavel className="w-3 h-3 mr-1" />
+                For Clients
+              </Badge>
+              <h2 className="text-4xl font-bold text-foreground mb-4">
+                Request for Bids
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Post your trip requirements and let drivers compete with their best offers. Get the best value for your journey.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <Card className="text-center">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Gavel className="w-8 h-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Post Your Request</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Describe your trip needs, dates, and preferences
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="text-center">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <DollarSign className="w-8 h-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Compare Offers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Review competitive bids from qualified drivers and owners
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="text-center">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Choose the Best</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Select the offer that matches your budget and requirements
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center">
+              <Button asChild size="lg">
+                <Link to="/client/create-bid-request">
+                  <Gavel className="w-5 h-5 mr-2" />
+                  Request Bids for Your Trip
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
