@@ -88,7 +88,13 @@ const ManageFleetOwners = () => {
                         <p className="text-sm text-muted-foreground">PIN: {owner.company_pin}</p>
                       </>
                     )}
-                    <p className="text-sm text-muted-foreground">Phone: {owner.phone}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {owner.email && `${owner.email} • `}
+                      {owner.phone && `${owner.phone}`}
+                    </p>
+                    {owner.country && (
+                      <p className="text-sm text-muted-foreground">Country: {owner.country}</p>
+                    )}
                   </div>
                   <Badge variant={owner.entity_type === "company" ? "default" : "secondary"}>
                     {owner.entity_type}
