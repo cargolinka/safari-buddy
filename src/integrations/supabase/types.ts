@@ -305,6 +305,69 @@ export type Database = {
         }
         Relationships: []
       }
+      empty_legs: {
+        Row: {
+          created_at: string
+          departure_date: string
+          departure_time: string
+          destination: string
+          discounted_rate: number
+          driver_id: string
+          id: string
+          notes: string | null
+          origin: string
+          seats_available: number
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          departure_date: string
+          departure_time: string
+          destination: string
+          discounted_rate: number
+          driver_id: string
+          id?: string
+          notes?: string | null
+          origin: string
+          seats_available: number
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          departure_date?: string
+          departure_time?: string
+          destination?: string
+          discounted_rate?: number
+          driver_id?: string
+          id?: string
+          notes?: string | null
+          origin?: string
+          seats_available?: number
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empty_legs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "empty_legs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hero_slides: {
         Row: {
           button_link: string
