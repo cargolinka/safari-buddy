@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building } from "lucide-react";
+import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -473,6 +473,80 @@ const Index = () => {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Empty Legs Section */}
+      <section className="py-20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-green-600 text-white">
+                <DollarSign className="w-3 h-3 mr-1" />
+                Special Offers
+              </Badge>
+              <h2 className="text-4xl font-bold text-foreground mb-4">
+                Empty Legs - Save Up to 50%
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Book discounted trips on empty return journeys. Great deals on one-way trips when drivers are returning to their base.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <Card className="text-center border-2 border-green-600/20 hover:border-green-600/40 transition-colors">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-green-600/10 flex items-center justify-center mx-auto mb-4">
+                    <DollarSign className="w-8 h-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-xl">Huge Savings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Save up to 50% on regular rates for empty return trips
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="text-center border-2 border-green-600/20 hover:border-green-600/40 transition-colors">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-green-600/10 flex items-center justify-center mx-auto mb-4">
+                    <MapPin className="w-8 h-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-xl">Popular Routes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Nairobi-Mombasa, Safari parks returns, and more
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="text-center border-2 border-green-600/20 hover:border-green-600/40 transition-colors">
+                <CardHeader>
+                  <div className="w-16 h-16 rounded-full bg-green-600/10 flex items-center justify-center mx-auto mb-4">
+                    <CalendarIcon className="w-8 h-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-xl">Same Quality</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    Same professional service and verified vehicles at lower prices
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center">
+              <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white">
+                <Link to="/empty-legs">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  Browse Empty Legs
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
