@@ -7,8 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
+import { EditFleetOwnerDialog } from "@/components/admin/EditFleetOwnerDialog";
 
 const ManageFleetOwners = () => {
   const { toast } = useToast();
@@ -17,6 +18,8 @@ const ManageFleetOwners = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState<any>(null);
 
   useEffect(() => {
     fetchFleetOwners();
@@ -72,6 +75,11 @@ const ManageFleetOwners = () => {
     ? pendingCompanies
     : pendingCompanies.filter(c => c.country === selectedCountry);
 
+  const handleEdit = (owner: any) => {
+    setSelectedOwner(owner);
+    setEditDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -114,7 +122,7 @@ const ManageFleetOwners = () => {
             <div className="space-y-4">
               {filteredOwners.map((owner) => (
                 <div key={owner.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">
                       {owner.entity_type === "company" ? owner.company_name : owner.full_name}
                     </p>
@@ -133,9 +141,18 @@ const ManageFleetOwners = () => {
                       <p className="text-sm text-muted-foreground">Country: {owner.country}</p>
                     )}
                   </div>
-                  <Badge variant={owner.entity_type === "company" ? "default" : "secondary"}>
-                    {owner.entity_type}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={owner.entity_type === "company" ? "default" : "secondary"}>
+                      {owner.entity_type}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(owner)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -146,6 +163,13 @@ const ManageFleetOwners = () => {
       <AddFleetOwnerDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        onSuccess={fetchFleetOwners}
+      />
+
+      <EditFleetOwnerDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        owner={selectedOwner}
         onSuccess={fetchFleetOwners}
       />
     </div>
