@@ -25,7 +25,7 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
     try {
       const { data, error } = await supabase
         .from("user_roles")
-        .select("user_id, profiles:user_id(id, full_name, email)")
+        .select("user_id, profiles!user_roles_user_id_fkey(id, full_name, phone)")
         .eq("role", "owner");
 
       if (error) throw error;
