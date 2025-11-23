@@ -28,6 +28,9 @@ const Auth = () => {
   const [companyName, setCompanyName] = useState("");
   const [companyPin, setCompanyPin] = useState("");
   const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState("");
+  const [incorporationCert, setIncorporationCert] = useState<File | null>(null);
+  const [pinCert, setPinCert] = useState<File | null>(null);
+  const [businessPermit, setBusinessPermit] = useState<File | null>(null);
   const preSelectedRole = searchParams.get("role");
 
   // Removed automatic redirect - let users see the auth form
@@ -105,6 +108,39 @@ const Auth = () => {
             .eq("id", data.user.id);
 
           if (profileError) throw profileError;
+
+          // Upload company documents if provided
+          if (role === 'owner' && entityType === 'company') {
+            const documentsToUpload = [
+              { file: incorporationCert, type: 'certificate_of_incorporation' },
+              { file: pinCert, type: 'pin_certificate' },
+              { file: businessPermit, type: 'business_permit' }
+            ];
+
+            for (const doc of documentsToUpload) {
+              if (doc.file) {
+                const fileExt = doc.file.name.split('.').pop();
+                const filePath = `${data.user.id}/${doc.type}.${fileExt}`;
+                
+                const { error: uploadError } = await supabase.storage
+                  .from('company-documents')
+                  .upload(filePath, doc.file);
+
+                if (uploadError) throw uploadError;
+
+                // Store document record
+                const { error: docError } = await supabase
+                  .from('company_documents')
+                  .insert({
+                    company_id: data.user.id,
+                    document_type: doc.type,
+                    file_path: filePath
+                  });
+
+                if (docError) throw docError;
+              }
+            }
+          }
 
           toast({
             title: "Account Created",
@@ -307,6 +343,44 @@ const Auth = () => {
                               value={companyRegistrationNumber}
                               onChange={(e) => setCompanyRegistrationNumber(e.target.value)}
                             />
+                          </div>
+
+                          <div className="space-y-4 pt-4 border-t">
+                            <h4 className="font-medium text-sm">Company Documents</h4>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="incorporationCert">Certificate of Incorporation *</Label>
+                              <Input
+                                id="incorporationCert"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => setIncorporationCert(e.target.files?.[0] || null)}
+                                required
+                              />
+                              <p className="text-xs text-muted-foreground">PDF, JPG, or PNG (max 20MB)</p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="pinCert">KRA PIN Certificate</Label>
+                              <Input
+                                id="pinCert"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => setPinCert(e.target.files?.[0] || null)}
+                              />
+                              <p className="text-xs text-muted-foreground">PDF, JPG, or PNG (max 20MB)</p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="businessPermit">Business Permit/License</Label>
+                              <Input
+                                id="businessPermit"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => setBusinessPermit(e.target.files?.[0] || null)}
+                              />
+                              <p className="text-xs text-muted-foreground">PDF, JPG, or PNG (max 20MB)</p>
+                            </div>
                           </div>
                         </>
                       )}
