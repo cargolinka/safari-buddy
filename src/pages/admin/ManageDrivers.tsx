@@ -28,7 +28,7 @@ const ManageDrivers = () => {
         .from("drivers")
         .select(`
           *,
-          profiles:id (full_name, phone, country, email)
+          profiles!inner (full_name, phone, country, email)
         `)
         .order("created_at", { ascending: false });
 
