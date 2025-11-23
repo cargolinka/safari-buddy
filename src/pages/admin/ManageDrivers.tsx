@@ -25,7 +25,7 @@ const ManageDrivers = () => {
         .from("drivers")
         .select(`
           *,
-          profiles:id (full_name, phone)
+          profiles:id (full_name, phone, country, email)
         `)
         .order("created_at", { ascending: false });
 
@@ -73,6 +73,10 @@ const ManageDrivers = () => {
                 <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium">{driver.profiles?.full_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {driver.profiles?.email && `${driver.profiles.email} • `}
+                      {driver.profiles?.country && `${driver.profiles.country}`}
+                    </p>
                     <p className="text-sm text-muted-foreground">License: {driver.license_number}</p>
                     <p className="text-sm text-muted-foreground">Expiry: {driver.license_expiry}</p>
                   </div>

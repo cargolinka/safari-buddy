@@ -238,8 +238,16 @@ export default function DriverProfile() {
               <p className="text-sm mt-1">{profile?.full_name || "N/A"}</p>
             </div>
             <div>
+              <Label>Email</Label>
+              <p className="text-sm mt-1">{profile?.email || "N/A"}</p>
+            </div>
+            <div>
               <Label>Phone</Label>
               <p className="text-sm mt-1">{profile?.phone || "N/A"}</p>
+            </div>
+            <div>
+              <Label>Country</Label>
+              <p className="text-sm mt-1">{profile?.country || "N/A"}</p>
             </div>
           </CardContent>
         </Card>
