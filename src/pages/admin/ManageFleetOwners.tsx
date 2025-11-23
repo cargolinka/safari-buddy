@@ -438,6 +438,19 @@ const ManageFleetOwners = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AddFleetOwnerDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchFleetOwners}
+      />
+
+      <EditFleetOwnerDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        owner={selectedOwner}
+        onSuccess={fetchFleetOwners}
+      />
+
       <SuspensionEmailPreview
         open={emailPreviewOpen}
         onOpenChange={setEmailPreviewOpen}
