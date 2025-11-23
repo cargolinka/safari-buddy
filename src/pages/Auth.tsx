@@ -24,6 +24,10 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState<string>("");
+  const [entityType, setEntityType] = useState<string>("individual");
+  const [companyName, setCompanyName] = useState("");
+  const [companyPin, setCompanyPin] = useState("");
+  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState("");
   const preSelectedRole = searchParams.get("role");
 
   // Removed automatic redirect - let users see the auth form
@@ -82,9 +86,22 @@ const Auth = () => {
           if (roleError) throw roleError;
 
           // Update profile
+          const profileUpdate: any = { 
+            full_name: fullName, 
+            phone, 
+            country,
+            entity_type: role === 'owner' ? entityType : (role === 'client_corporate' ? 'company' : 'individual')
+          };
+          
+          if (role === 'owner' && entityType === 'company') {
+            profileUpdate.company_name = companyName;
+            profileUpdate.company_pin = companyPin;
+            profileUpdate.company_registration_number = companyRegistrationNumber;
+          }
+          
           const { error: profileError } = await supabase
             .from("profiles")
-            .update({ full_name: fullName, phone, country })
+            .update(profileUpdate)
             .eq("id", data.user.id);
 
           if (profileError) throw profileError;
@@ -243,6 +260,58 @@ const Auth = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {role === "owner" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="entityType">Entity Type</Label>
+                        <Select value={entityType} onValueChange={setEntityType} required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select entity type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="individual">Individual</SelectItem>
+                            <SelectItem value="company">Company</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {entityType === "company" && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="companyName">Company Name *</Label>
+                            <Input
+                              id="companyName"
+                              type="text"
+                              value={companyName}
+                              onChange={(e) => setCompanyName(e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="companyPin">Company PIN</Label>
+                            <Input
+                              id="companyPin"
+                              type="text"
+                              value={companyPin}
+                              onChange={(e) => setCompanyPin(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="companyRegistrationNumber">Company Registration Number</Label>
+                            <Input
+                              id="companyRegistrationNumber"
+                              type="text"
+                              value={companyRegistrationNumber}
+                              onChange={(e) => setCompanyRegistrationNumber(e.target.value)}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
                 </>
               )}
 
