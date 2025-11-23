@@ -21,6 +21,9 @@ interface DocumentAlert {
   alertType: string;
   ownerEmail?: string;
   ownerName?: string;
+  subject?: string;
+  color?: string;
+  urgency?: string;
 }
 
 // Define alert thresholds and configurations
@@ -197,7 +200,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <p style="margin: 5px 0;"><strong>Document Type:</strong> ${docTypeFormatted}</p>
                   <p style="margin: 5px 0;"><strong>Expiry Date:</strong> ${new Date(alert.expiry_date).toLocaleDateString()}</p>
                   <p style="margin: 5px 0; color: ${alert.color}; font-size: 18px; font-weight: bold;"><strong>Status:</strong> ${statusMessage}</p>
-                  <p style="margin: 5px 0;"><strong>Urgency Level:</strong> ${alert.urgency.toUpperCase()}</p>
+                  <p style="margin: 5px 0;"><strong>Urgency Level:</strong> ${alert.urgency?.toUpperCase() || 'MEDIUM'}</p>
                 </div>
                 
                 ${actionMessage}
