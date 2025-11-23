@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_history: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          days_until_expiry: number | null
+          document_id: string | null
+          id: string
+          sent_at: string | null
+          sent_to: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          days_until_expiry?: number | null
+          document_id?: string | null
+          id?: string
+          sent_at?: string | null
+          sent_to: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          days_until_expiry?: number | null
+          document_id?: string | null
+          id?: string
+          sent_at?: string | null
+          sent_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_history_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           client_id: string
