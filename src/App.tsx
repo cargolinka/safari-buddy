@@ -38,6 +38,11 @@ import ManageEmptyLegs from "./pages/driver/ManageEmptyLegs";
 import CompanySetup from "./pages/owner/CompanySetup";
 import InviteDriver from "./pages/owner/InviteDriver";
 import BrowseEmptyLegs from "./pages/BrowseEmptyLegs";
+import CreateBidRequest from "./pages/client/CreateBidRequest";
+import MyBidRequests from "./pages/client/MyBidRequests";
+import ViewBids from "./pages/client/ViewBids";
+import BrowseBidRequests from "./pages/driver/BrowseBidRequests";
+import SubmitBid from "./pages/driver/SubmitBid";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +93,13 @@ const App = () => (
           <Route path="/driver/trips" element={<DriverTrips />} />
           <Route path="/driver/invitations" element={<PendingInvitations />} />
           <Route path="/driver/empty-legs" element={<ManageEmptyLegs />} />
+          <Route path="/driver/bid-requests" element={<BrowseBidRequests />} />
+          <Route path="/driver/submit-bid/:requestId" element={<SubmitBid />} />
+          
+          {/* Client Routes */}
+          <Route path="/client/create-bid-request" element={<CreateBidRequest />} />
+          <Route path="/client/bid-requests" element={<MyBidRequests />} />
+          <Route path="/client/bid-request/:requestId" element={<ViewBids />} />
           
           {/* Owner Additional Routes */}
           <Route path="/owner/company-setup" element={<CompanySetup />} />
