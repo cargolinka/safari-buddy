@@ -10,9 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
-import { Plus, Pencil, Ban, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Ban, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
 import { EditFleetOwnerDialog } from "@/components/admin/EditFleetOwnerDialog";
+import { SuspensionEmailPreview } from "@/components/admin/SuspensionEmailPreview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,7 @@ const ManageFleetOwners = () => {
   const [ownerToSuspend, setOwnerToSuspend] = useState<any>(null);
   const [suspensionReason, setSuspensionReason] = useState("");
   const [suspensionNotes, setSuspensionNotes] = useState("");
+  const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
 
   useEffect(() => {
     fetchFleetOwners();
@@ -393,6 +395,22 @@ const ManageFleetOwners = () => {
                         rows={4}
                       />
                     </div>
+                    
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEmailPreviewOpen(true)}
+                        disabled={!suspensionReason}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Preview Email
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        See what the notification will look like
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -419,6 +437,23 @@ const ManageFleetOwners = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SuspensionEmailPreview
+        open={emailPreviewOpen}
+        onOpenChange={setEmailPreviewOpen}
+        ownerName={
+          ownerToSuspend?.entity_type === "company"
+            ? ownerToSuspend?.company_name
+            : ownerToSuspend?.full_name
+        }
+        isSuspension={ownerToSuspend?.account_status !== "suspended"}
+        suspensionReason={suspensionReason}
+        suspensionNotes={suspensionNotes}
+        onConfirm={() => {
+          setSuspendDialogOpen(false);
+          handleToggleSuspension();
+        }}
+      />
     </div>
   );
 };
