@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone } from "lucide-react";
+import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,15 +161,25 @@ const Index = () => {
                     <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
                       {slide.description}
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                        <Link to={slide.button_link}>{slide.button_text}</Link>
+                        <Link to="/auth?role=driver">
+                          <Car className="w-5 h-5 mr-2" />
+                          Driver Login
+                        </Link>
                       </Button>
-                      {slide.secondary_button_text && slide.secondary_button_link && (
-                        <Button asChild size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20">
-                          <Link to={slide.secondary_button_link}>{slide.secondary_button_text}</Link>
-                        </Button>
-                      )}
+                      <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                        <Link to="/auth?role=client_individual">
+                          <User className="w-5 h-5 mr-2" />
+                          Client Login
+                        </Link>
+                      </Button>
+                      <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                        <Link to="/auth?role=owner">
+                          <Building className="w-5 h-5 mr-2" />
+                          Vehicle Owner Login
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </div>
