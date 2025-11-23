@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
+import { Plus } from "lucide-react";
+import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
 
 const ManageFleetOwners = () => {
   const { toast } = useToast();
@@ -13,6 +16,7 @@ const ManageFleetOwners = () => {
   const [pendingCompanies, setPendingCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchFleetOwners();
@@ -70,9 +74,15 @@ const ManageFleetOwners = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Fleet Owners</h2>
-        <p className="text-muted-foreground">Manage fleet owners and companies</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Fleet Owners</h2>
+          <p className="text-muted-foreground">Manage fleet owners and companies</p>
+        </div>
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Fleet Owner
+        </Button>
       </div>
 
       <div className="flex items-center gap-4">
@@ -132,6 +142,12 @@ const ManageFleetOwners = () => {
           )}
         </CardContent>
       </Card>
+
+      <AddFleetOwnerDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchFleetOwners}
+      />
     </div>
   );
 };
