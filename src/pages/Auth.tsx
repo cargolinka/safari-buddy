@@ -218,7 +218,7 @@ const Auth = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="role">I am a...</Label>
-                    <Select value={role} onValueChange={setRole} required disabled={!!preSelectedRole}>
+                    <Select value={role} onValueChange={setRole} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
@@ -229,11 +229,6 @@ const Auth = () => {
                         <SelectItem value="driver">Driver</SelectItem>
                       </SelectContent>
                     </Select>
-                    {preSelectedRole && (
-                      <p className="text-xs text-muted-foreground">
-                        Role pre-selected. To change, visit the sign up page.
-                      </p>
-                    )}
                   </div>
                 </>
               )}
