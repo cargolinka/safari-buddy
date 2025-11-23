@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { RegistrationSteps } from "@/components/driver/RegistrationSteps";
 import { DocumentUploadField } from "@/components/driver/DocumentUploadField";
+import { COUNTRIES } from "@/lib/countries";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { addRole } from "@/lib/roleHelpers";
@@ -34,6 +36,7 @@ export default function DriverRegister() {
   // Step 2: Personal Info
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
   const [idNumber, setIdNumber] = useState("");
 
   // Step 3: License
@@ -68,7 +71,7 @@ export default function DriverRegister() {
         }
         return true;
       case 2:
-        if (!fullName || !phone || !idNumber) {
+        if (!fullName || !phone || !country || !idNumber) {
           toast.error("Please fill all personal information");
           return false;
         }
@@ -156,6 +159,7 @@ export default function DriverRegister() {
         .update({
           full_name: fullName,
           phone,
+          country,
           entity_type: ownsVehicles ? entityType : 'individual',
           company_name: ownsVehicles && entityType === 'company' ? companyName : null,
           company_registration_number: ownsVehicles && entityType === 'company' ? companyRegNumber : null,
@@ -296,6 +300,21 @@ export default function DriverRegister() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+254712345678"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country *</Label>
+                  <Select value={country} onValueChange={setCountry} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c.code} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="idNumber">National ID Number *</Label>
