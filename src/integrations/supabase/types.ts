@@ -311,6 +311,7 @@ export type Database = {
           company_pin: string | null
           company_registration_number: string | null
           created_at: string
+          email: string | null
           entity_type: string | null
           full_name: string
           id: string
@@ -323,6 +324,7 @@ export type Database = {
           company_pin?: string | null
           company_registration_number?: string | null
           created_at?: string
+          email?: string | null
           entity_type?: string | null
           full_name: string
           id: string
@@ -335,6 +337,7 @@ export type Database = {
           company_pin?: string | null
           company_registration_number?: string | null
           created_at?: string
+          email?: string | null
           entity_type?: string | null
           full_name?: string
           id?: string
