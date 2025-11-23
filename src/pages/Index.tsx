@@ -24,13 +24,56 @@ const Index = () => {
   const [vehicleType, setVehicleType] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
+  const [heroSlides, setHeroSlides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const heroImages = [heroImage1, heroImage2, heroImage3];
 
   useEffect(() => {
     fetchFeaturedVehicles();
+    fetchHeroSlides();
   }, []);
+
+  const fetchHeroSlides = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("hero_slides")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      
+      // Fallback to default slide if no slides exist
+      if (!data || data.length === 0) {
+        setHeroSlides([{
+          id: "default",
+          title: "Adventure Awaits",
+          subtitle: "Premium Safari Vehicle Hire",
+          description: "Explore the wild with our top-quality safari vehicles. Professional drivers and well-maintained fleet for your unforgettable journey.",
+          image_url: heroImage1,
+          button_text: "Browse Vehicles",
+          button_link: "/vehicles",
+          secondary_button_text: "Learn More",
+          secondary_button_link: "/about",
+        }]);
+      } else {
+        setHeroSlides(data);
+      }
+    } catch (error) {
+      console.error("Error fetching hero slides:", error);
+      // Fallback on error
+      setHeroSlides([{
+        id: "default",
+        title: "Adventure Awaits",
+        subtitle: "Premium Safari Vehicle Hire",
+        description: "Explore the wild with our top-quality safari vehicles.",
+        image_url: heroImage1,
+        button_text: "Browse Vehicles",
+        button_link: "/vehicles",
+        secondary_button_text: "Learn More",
+        secondary_button_link: "/about",
+      }]);
+    }
+  };
 
   const fetchFeaturedVehicles = async () => {
     try {
@@ -98,33 +141,35 @@ const Index = () => {
       <section className="relative overflow-hidden">
         <Carousel className="w-full" opts={{ loop: true }}>
           <CarouselContent>
-            {heroImages.map((image, index) => (
-              <CarouselItem key={index}>
+            {heroSlides.map((slide) => (
+              <CarouselItem key={slide.id}>
                 <div className="relative h-[70vh] flex items-center justify-center">
                   <div 
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${image})` }}
+                    style={{ backgroundImage: `url(${slide.image_url})` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-background" />
                   </div>
                   
                   <div className="relative z-10 container mx-auto px-4 text-center">
                     <Badge className="mb-6 bg-accent text-accent-foreground">
-                      Premium Safari Vehicle Hire
+                      {slide.subtitle}
                     </Badge>
                     <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-                      Adventure Awaits
+                      {slide.title}
                     </h1>
                     <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
-                      Professional vehicle hire platform connecting clients with verified owners and licensed drivers
+                      {slide.description}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                        <Link to="/auth">Get Started</Link>
+                        <Link to={slide.button_link}>{slide.button_text}</Link>
                       </Button>
-                      <Button asChild size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20">
-                        <Link to="/vehicles">Browse Vehicles</Link>
-                      </Button>
+                      {slide.secondary_button_text && slide.secondary_button_link && (
+                        <Button asChild size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20">
+                          <Link to={slide.secondary_button_link}>{slide.secondary_button_text}</Link>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

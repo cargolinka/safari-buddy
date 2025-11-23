@@ -305,6 +305,54 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          button_link: string
+          button_text: string
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          image_url: string
+          is_active: boolean
+          secondary_button_link: string | null
+          secondary_button_text: string | null
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_link: string
+          button_text: string
+          created_at?: string
+          description: string
+          display_order?: number
+          id?: string
+          image_url: string
+          is_active?: boolean
+          secondary_button_link?: string | null
+          secondary_button_text?: string | null
+          subtitle: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          button_link?: string
+          button_text?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          secondary_button_link?: string | null
+          secondary_button_text?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
