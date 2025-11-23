@@ -25,7 +25,7 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
     try {
       const { data, error } = await supabase
         .from("user_roles")
-        .select("user_id, profiles!user_roles_user_id_fkey(id, full_name, phone)")
+        .select("user_id, profiles!user_roles_user_id_fkey(id, full_name, phone, email)")
         .eq("role", "owner");
 
       if (error) throw error;
@@ -149,7 +149,7 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
               <SelectContent>
                 {owners.map((owner) => (
                   <SelectItem key={owner.id} value={owner.id}>
-                    {owner.full_name}
+                    {owner.full_name} {owner.email && `(${owner.email})`}
                   </SelectItem>
                 ))}
               </SelectContent>
