@@ -355,6 +355,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string | null
           company_name: string | null
           company_pin: string | null
           company_registration_number: string | null
@@ -369,6 +370,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: string | null
           company_name?: string | null
           company_pin?: string | null
           company_registration_number?: string | null
@@ -383,6 +385,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: string | null
           company_name?: string | null
           company_pin?: string | null
           company_registration_number?: string | null
@@ -538,6 +541,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_user_suspended: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:

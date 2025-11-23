@@ -7,9 +7,19 @@ import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Ban, CheckCircle } from "lucide-react";
 import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
 import { EditFleetOwnerDialog } from "@/components/admin/EditFleetOwnerDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ManageFleetOwners = () => {
   const { toast } = useToast();
@@ -20,6 +30,8 @@ const ManageFleetOwners = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedOwner, setSelectedOwner] = useState<any>(null);
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [ownerToSuspend, setOwnerToSuspend] = useState<any>(null);
 
   useEffect(() => {
     fetchFleetOwners();
@@ -80,6 +92,42 @@ const ManageFleetOwners = () => {
     setEditDialogOpen(true);
   };
 
+  const handleSuspendClick = (owner: any) => {
+    setOwnerToSuspend(owner);
+    setSuspendDialogOpen(true);
+  };
+
+  const handleToggleSuspension = async () => {
+    if (!ownerToSuspend) return;
+
+    const newStatus = ownerToSuspend.account_status === "suspended" ? "active" : "suspended";
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ account_status: newStatus })
+        .eq("id", ownerToSuspend.id);
+
+      if (error) throw error;
+
+      toast({
+        title: newStatus === "suspended" ? "Account Suspended" : "Account Activated",
+        description: `Fleet owner account has been ${newStatus === "suspended" ? "suspended" : "activated"} successfully.`,
+      });
+
+      fetchFleetOwners();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSuspendDialogOpen(false);
+      setOwnerToSuspend(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -121,11 +169,24 @@ const ManageFleetOwners = () => {
           ) : (
             <div className="space-y-4">
               {filteredOwners.map((owner) => (
-                <div key={owner.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div 
+                  key={owner.id} 
+                  className={`flex items-center justify-between p-4 border rounded-lg ${
+                    owner.account_status === "suspended" ? "bg-muted/50 opacity-75" : ""
+                  }`}
+                >
                   <div className="flex-1">
-                    <p className="font-medium">
-                      {owner.entity_type === "company" ? owner.company_name : owner.full_name}
-                    </p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium">
+                        {owner.entity_type === "company" ? owner.company_name : owner.full_name}
+                      </p>
+                      <Badge 
+                        variant={owner.account_status === "suspended" ? "destructive" : "default"}
+                        className="text-xs"
+                      >
+                        {owner.account_status === "suspended" ? "Suspended" : "Active"}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">Type: {owner.entity_type}</p>
                     {owner.entity_type === "company" && (
                       <>
@@ -149,8 +210,21 @@ const ManageFleetOwners = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(owner)}
+                      title="Edit owner"
                     >
                       <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSuspendClick(owner)}
+                      title={owner.account_status === "suspended" ? "Activate account" : "Suspend account"}
+                    >
+                      {owner.account_status === "suspended" ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Ban className="h-4 w-4 text-destructive" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -172,6 +246,55 @@ const ManageFleetOwners = () => {
         owner={selectedOwner}
         onSuccess={fetchFleetOwners}
       />
+
+      <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {ownerToSuspend?.account_status === "suspended" 
+                ? "Activate Fleet Owner Account" 
+                : "Suspend Fleet Owner Account"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {ownerToSuspend?.account_status === "suspended" ? (
+                <>
+                  Are you sure you want to activate{" "}
+                  <strong>
+                    {ownerToSuspend?.entity_type === "company" 
+                      ? ownerToSuspend?.company_name 
+                      : ownerToSuspend?.full_name}
+                  </strong>
+                  ? They will regain access to their account and all features.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to suspend{" "}
+                  <strong>
+                    {ownerToSuspend?.entity_type === "company" 
+                      ? ownerToSuspend?.company_name 
+                      : ownerToSuspend?.full_name}
+                  </strong>
+                  ? They will be logged out and unable to access their account until reactivated.
+                  Their vehicles will also become unavailable.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleToggleSuspension}
+              className={
+                ownerToSuspend?.account_status === "suspended"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : ""
+              }
+            >
+              {ownerToSuspend?.account_status === "suspended" ? "Activate" : "Suspend"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
