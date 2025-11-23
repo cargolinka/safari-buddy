@@ -34,8 +34,10 @@ import DriverProfile from "./pages/driver/DriverProfile";
 import DriverTrips from "./pages/driver/DriverTrips";
 import DriverRegister from "./pages/driver/DriverRegister";
 import PendingInvitations from "./pages/driver/PendingInvitations";
+import ManageEmptyLegs from "./pages/driver/ManageEmptyLegs";
 import CompanySetup from "./pages/owner/CompanySetup";
 import InviteDriver from "./pages/owner/InviteDriver";
+import BrowseEmptyLegs from "./pages/BrowseEmptyLegs";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/vehicles" element={<Vehicles />} />
+          <Route path="/empty-legs" element={<BrowseEmptyLegs />} />
           <Route path="/about" element={<About />} />
           <Route path="/why-us" element={<WhyUs />} />
           <Route path="/gallery" element={<Gallery />} />
@@ -84,6 +87,7 @@ const App = () => (
           <Route path="/driver/profile" element={<DriverProfile />} />
           <Route path="/driver/trips" element={<DriverTrips />} />
           <Route path="/driver/invitations" element={<PendingInvitations />} />
+          <Route path="/driver/empty-legs" element={<ManageEmptyLegs />} />
           
           {/* Owner Additional Routes */}
           <Route path="/owner/company-setup" element={<CompanySetup />} />
