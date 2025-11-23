@@ -53,13 +53,14 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
 
   const createFleetOwnerMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Create auth user with signUp
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: data.full_name,
+        options: {
+          data: {
+            full_name: data.full_name,
+          },
         },
       });
 
@@ -68,10 +69,8 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
 
       const userId = authData.user.id;
 
-      // Create profile
+      // Update profile with additional data
       const profileData: any = {
-        id: userId,
-        email: data.email,
         full_name: data.full_name,
         phone: data.phone,
         country: data.country,
@@ -87,13 +86,10 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
 
       const { error: profileError } = await supabase
         .from("profiles")
-        .insert(profileData);
+        .update(profileData)
+        .eq("id", userId);
 
-      if (profileError) {
-        // Cleanup: delete the auth user if profile creation fails
-        await supabase.auth.admin.deleteUser(userId);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
       // Add owner role
       const { error: roleError } = await supabase
@@ -103,12 +99,7 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
           role: "owner",
         });
 
-      if (roleError) {
-        // Cleanup if role creation fails
-        await supabase.from("profiles").delete().eq("id", userId);
-        await supabase.auth.admin.deleteUser(userId);
-        throw roleError;
-      }
+      if (roleError) throw roleError;
 
       return authData.user;
     },
