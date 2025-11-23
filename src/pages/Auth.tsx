@@ -26,16 +26,7 @@ const Auth = () => {
   const [role, setRole] = useState<string>("");
   const preSelectedRole = searchParams.get("role");
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
-      }
-    };
-    
-    checkSession();
-  }, [navigate]);
+  // Removed automatic redirect - let users see the auth form
 
   useEffect(() => {
     if (preSelectedRole) {
