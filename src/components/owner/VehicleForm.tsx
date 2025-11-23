@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X } from "lucide-react";
+import { DocumentUploadField } from "@/components/driver/DocumentUploadField";
 
 const vehicleSchema = z.object({
   model: z.string().min(1, "Model is required"),
@@ -49,6 +50,12 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  
+  // Document upload states
+  const [insuranceDoc, setInsuranceDoc] = useState<File | null>(null);
+  const [inspectionDoc, setInspectionDoc] = useState<File | null>(null);
+  const [roadLicenseDoc, setRoadLicenseDoc] = useState<File | null>(null);
+  const [psvLicenseDoc, setPsvLicenseDoc] = useState<File | null>(null);
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
@@ -247,13 +254,78 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
     }
   };
 
+  const uploadDocuments = async (vehicleId: string, formData: VehicleFormData) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const documentUploads = [
+        { file: insuranceDoc, type: 'insurance' as const, expiry: formData.insurance_expiry },
+        { file: inspectionDoc, type: 'inspection' as const, expiry: formData.inspection_expiry },
+        { file: roadLicenseDoc, type: 'road_license' as const, expiry: formData.road_license_expiry },
+        { file: psvLicenseDoc, type: 'road_license' as const, expiry: formData.tsv_psv_licence_expiry },
+      ].filter(doc => doc.file !== null);
+
+      for (const doc of documentUploads) {
+        if (!doc.file) continue;
+
+        const fileExt = doc.file.name.split('.').pop();
+        const fileName = `${vehicleId}/${doc.type}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('vehicle-documents')
+          .upload(fileName, doc.file);
+
+        if (uploadError) throw uploadError;
+
+        // Insert document record
+        const { error: dbError } = await supabase
+          .from('documents')
+          .insert({
+            entity_type: 'vehicle',
+            entity_id: vehicleId,
+            document_type: doc.type,
+            file_path: fileName,
+            expiry_date: doc.expiry || null,
+          });
+
+        if (dbError) throw dbError;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error uploading documents",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const onFormSubmit = async (data: VehicleFormData) => {
     const imageUrls = await uploadImages();
-    await onSubmit({ 
+    const vehicleData = { 
       ...data, 
       image_urls: imageUrls,
-      image_url: imageUrls[0] || null // Keep for backward compatibility
-    });
+      image_url: imageUrls[0] || null
+    };
+    
+    // If this is a new vehicle (no initialData.id), we need to handle documents after creation
+    if (!initialData?.id) {
+      // For new vehicles, pass document data along
+      await onSubmit({ 
+        ...vehicleData,
+        _documentFiles: {
+          insurance: insuranceDoc,
+          inspection: inspectionDoc,
+          roadLicense: roadLicenseDoc,
+          psvLicense: psvLicenseDoc,
+        }
+      });
+    } else {
+      // For existing vehicles, upload documents directly
+      await uploadDocuments(initialData.id, data);
+      await onSubmit(vehicleData);
+    }
   };
 
   return (
@@ -456,30 +528,66 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
         <CardHeader>
           <CardTitle>Compliance Documents</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="insurance_expiry">Insurance Expiry Date *</Label>
-            <Input id="insurance_expiry" type="date" {...register("insurance_expiry")} />
-            {errors.insurance_expiry && <p className="text-sm text-destructive mt-1">{errors.insurance_expiry.message}</p>}
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="insurance_expiry">Insurance Expiry Date *</Label>
+              <Input id="insurance_expiry" type="date" {...register("insurance_expiry")} />
+              {errors.insurance_expiry && <p className="text-sm text-destructive mt-1">{errors.insurance_expiry.message}</p>}
+            </div>
+            <DocumentUploadField
+              label="Insurance Document"
+              required
+              accept=".pdf,.jpg,.jpeg,.png"
+              maxSize={5}
+              onFileSelect={setInsuranceDoc}
+            />
           </div>
 
-          <div>
-            <Label htmlFor="inspection_expiry">Inspection Expiry Date *</Label>
-            <Input id="inspection_expiry" type="date" {...register("inspection_expiry")} />
-            {errors.inspection_expiry && <p className="text-sm text-destructive mt-1">{errors.inspection_expiry.message}</p>}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="inspection_expiry">Inspection Expiry Date *</Label>
+              <Input id="inspection_expiry" type="date" {...register("inspection_expiry")} />
+              {errors.inspection_expiry && <p className="text-sm text-destructive mt-1">{errors.inspection_expiry.message}</p>}
+            </div>
+            <DocumentUploadField
+              label="Inspection Certificate"
+              required
+              accept=".pdf,.jpg,.jpeg,.png"
+              maxSize={5}
+              onFileSelect={setInspectionDoc}
+            />
           </div>
 
-          <div>
-            <Label htmlFor="road_license_expiry">Road License Expiry Date *</Label>
-            <Input id="road_license_expiry" type="date" {...register("road_license_expiry")} />
-            {errors.road_license_expiry && <p className="text-sm text-destructive mt-1">{errors.road_license_expiry.message}</p>}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="road_license_expiry">Road License Expiry Date *</Label>
+              <Input id="road_license_expiry" type="date" {...register("road_license_expiry")} />
+              {errors.road_license_expiry && <p className="text-sm text-destructive mt-1">{errors.road_license_expiry.message}</p>}
+            </div>
+            <DocumentUploadField
+              label="Road License Document"
+              required
+              accept=".pdf,.jpg,.jpeg,.png"
+              maxSize={5}
+              onFileSelect={setRoadLicenseDoc}
+            />
           </div>
 
-          <div>
-            <Label htmlFor="tsv_psv_licence_expiry">TSV/PSV Licence Expiry Date</Label>
-            <Input id="tsv_psv_licence_expiry" type="date" {...register("tsv_psv_licence_expiry")} />
-            <p className="text-xs text-muted-foreground mt-1">Required for commercial passenger vehicles</p>
-            {errors.tsv_psv_licence_expiry && <p className="text-sm text-destructive mt-1">{errors.tsv_psv_licence_expiry.message}</p>}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tsv_psv_licence_expiry">TSV/PSV Licence Expiry Date</Label>
+              <Input id="tsv_psv_licence_expiry" type="date" {...register("tsv_psv_licence_expiry")} />
+              <p className="text-xs text-muted-foreground mt-1">Required for commercial passenger vehicles</p>
+              {errors.tsv_psv_licence_expiry && <p className="text-sm text-destructive mt-1">{errors.tsv_psv_licence_expiry.message}</p>}
+            </div>
+            <DocumentUploadField
+              label="TSV/PSV Licence Document"
+              required={false}
+              accept=".pdf,.jpg,.jpeg,.png"
+              maxSize={5}
+              onFileSelect={setPsvLicenseDoc}
+            />
           </div>
         </CardContent>
       </Card>

@@ -59,16 +59,59 @@ export function AddVehicleDialog({ onSuccess }: { onSuccess: () => void }) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("vehicles").insert({
-        ...data,
-        owner_id: selectedOwnerId,
-      });
+      // Extract document files
+      const documentFiles = data._documentFiles;
+      delete data._documentFiles;
+
+      // Insert vehicle
+      const { data: vehicle, error } = await supabase.from("vehicles")
+        .insert({
+          ...data,
+          owner_id: selectedOwnerId,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
+      // Upload documents if provided
+      if (vehicle && documentFiles) {
+        const documentUploads = [
+          { file: documentFiles.insurance, type: 'insurance', expiry: data.insurance_expiry },
+          { file: documentFiles.inspection, type: 'inspection', expiry: data.inspection_expiry },
+          { file: documentFiles.roadLicense, type: 'road_license', expiry: data.road_license_expiry },
+          { file: documentFiles.psvLicense, type: 'road_license', expiry: data.tsv_psv_licence_expiry },
+        ].filter(doc => doc.file !== null);
+
+        for (const doc of documentUploads) {
+          if (!doc.file) continue;
+
+          const fileExt = doc.file.name.split('.').pop();
+          const fileName = `${vehicle.id}/${doc.type}-${Date.now()}.${fileExt}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('vehicle-documents')
+            .upload(fileName, doc.file);
+
+          if (uploadError) throw uploadError;
+
+          const { error: dbError } = await supabase
+            .from('documents')
+            .insert({
+              entity_type: 'vehicle',
+              entity_id: vehicle.id,
+              document_type: doc.type as any,
+              file_path: fileName,
+              expiry_date: doc.expiry || null,
+            });
+
+          if (dbError) throw dbError;
+        }
+      }
+
       toast({
         title: "Success",
-        description: "Vehicle added successfully",
+        description: "Vehicle added successfully with documents",
       });
       setOpen(false);
       setSelectedOwnerId("");
