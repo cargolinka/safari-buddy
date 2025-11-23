@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { COUNTRIES } from "@/lib/countries";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
   const [role, setRole] = useState<string>("");
 
   useEffect(() => {
@@ -42,6 +44,16 @@ const Auth = () => {
           toast({
             title: "Role Required",
             description: "Please select your role to continue",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!country) {
+          toast({
+            title: "Country Required",
+            description: "Please select your country to continue",
             variant: "destructive",
           });
           setLoading(false);
@@ -72,7 +84,7 @@ const Auth = () => {
           // Update profile
           const { error: profileError } = await supabase
             .from("profiles")
-            .update({ full_name: fullName, phone })
+            .update({ full_name: fullName, phone, country })
             .eq("id", data.user.id);
 
           if (profileError) throw profileError;
@@ -149,6 +161,22 @@ const Auth = () => {
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+254..."
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country *</Label>
+                    <Select value={country} onValueChange={setCountry} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your country" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[200px]">
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c.code} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
