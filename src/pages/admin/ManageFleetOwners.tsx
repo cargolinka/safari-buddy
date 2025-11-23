@@ -3,11 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
-import { Plus, Pencil, Ban, CheckCircle } from "lucide-react";
+import { Plus, Pencil, Ban, CheckCircle, AlertCircle } from "lucide-react";
 import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
 import { EditFleetOwnerDialog } from "@/components/admin/EditFleetOwnerDialog";
 import {
@@ -20,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
 
 const ManageFleetOwners = () => {
   const { toast } = useToast();
@@ -32,6 +36,8 @@ const ManageFleetOwners = () => {
   const [selectedOwner, setSelectedOwner] = useState<any>(null);
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [ownerToSuspend, setOwnerToSuspend] = useState<any>(null);
+  const [suspensionReason, setSuspensionReason] = useState("");
+  const [suspensionNotes, setSuspensionNotes] = useState("");
 
   useEffect(() => {
     fetchFleetOwners();
@@ -103,9 +109,23 @@ const ManageFleetOwners = () => {
     const newStatus = ownerToSuspend.account_status === "suspended" ? "active" : "suspended";
 
     try {
+      // Get current admin user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const updateData: any = { account_status: newStatus };
+
+      if (newStatus === "suspended") {
+        // Add suspension tracking when suspending
+        updateData.suspension_reason = suspensionReason;
+        updateData.suspension_notes = suspensionNotes;
+        updateData.suspended_at = new Date().toISOString();
+        updateData.suspended_by = user?.id;
+      }
+      // Clearing of suspension fields is handled by the trigger
+
       const { error } = await supabase
         .from("profiles")
-        .update({ account_status: newStatus })
+        .update(updateData)
         .eq("id", ownerToSuspend.id);
 
       if (error) throw error;
@@ -116,6 +136,8 @@ const ManageFleetOwners = () => {
       });
 
       fetchFleetOwners();
+      setSuspensionReason("");
+      setSuspensionNotes("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -201,6 +223,28 @@ const ManageFleetOwners = () => {
                     {owner.country && (
                       <p className="text-sm text-muted-foreground">Country: {owner.country}</p>
                     )}
+                    {owner.account_status === "suspended" && owner.suspension_reason && (
+                      <div className="mt-2 p-2 bg-destructive/10 rounded border border-destructive/20">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-destructive">
+                              Suspended: {owner.suspension_reason}
+                            </p>
+                            {owner.suspension_notes && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {owner.suspension_notes}
+                              </p>
+                            )}
+                            {owner.suspended_at && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                On {format(new Date(owner.suspended_at), "PPp")}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={owner.entity_type === "company" ? "default" : "secondary"}>
@@ -248,7 +292,7 @@ const ManageFleetOwners = () => {
       />
 
       <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {ownerToSuspend?.account_status === "suspended" 
@@ -269,28 +313,76 @@ const ManageFleetOwners = () => {
                   <span className="text-sm">
                     ✓ All compliant vehicles will automatically be restored to available status
                   </span>
+                  {ownerToSuspend?.suspension_reason && (
+                    <div className="mt-3 p-3 bg-muted rounded text-sm">
+                      <p className="font-medium">Current Suspension Details:</p>
+                      <p className="mt-1">Reason: {ownerToSuspend.suspension_reason}</p>
+                      {ownerToSuspend.suspension_notes && (
+                        <p className="mt-1">Notes: {ownerToSuspend.suspension_notes}</p>
+                      )}
+                    </div>
+                  )}
                 </>
               ) : (
-                <>
-                  Are you sure you want to suspend{" "}
-                  <strong>
-                    {ownerToSuspend?.entity_type === "company" 
-                      ? ownerToSuspend?.company_name 
-                      : ownerToSuspend?.full_name}
-                  </strong>
-                  ? They will be logged out and unable to access their account until reactivated.
-                  <br /><br />
-                  <span className="text-sm font-medium text-destructive">
+                <div className="space-y-4">
+                  <p>
+                    Are you sure you want to suspend{" "}
+                    <strong>
+                      {ownerToSuspend?.entity_type === "company" 
+                        ? ownerToSuspend?.company_name 
+                        : ownerToSuspend?.full_name}
+                    </strong>
+                    ? They will be logged out and unable to access their account until reactivated.
+                  </p>
+                  <p className="text-sm font-medium text-destructive">
                     ⚠ All their vehicles will automatically be marked as unavailable
-                  </span>
-                </>
+                  </p>
+                  
+                  <div className="space-y-3 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="suspension-reason">Suspension Reason *</Label>
+                      <Select value={suspensionReason} onValueChange={setSuspensionReason}>
+                        <SelectTrigger id="suspension-reason">
+                          <SelectValue placeholder="Select a reason" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Policy Violation">Policy Violation</SelectItem>
+                          <SelectItem value="Payment Issues">Payment Issues</SelectItem>
+                          <SelectItem value="Fraudulent Activity">Fraudulent Activity</SelectItem>
+                          <SelectItem value="Safety Concerns">Safety Concerns</SelectItem>
+                          <SelectItem value="Document Issues">Document Issues</SelectItem>
+                          <SelectItem value="Compliance Failure">Compliance Failure</SelectItem>
+                          <SelectItem value="Customer Complaints">Customer Complaints</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="suspension-notes">Additional Notes (Optional)</Label>
+                      <Textarea
+                        id="suspension-notes"
+                        value={suspensionNotes}
+                        onChange={(e) => setSuspensionNotes(e.target.value)}
+                        placeholder="Provide detailed information about the suspension..."
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => {
+              setSuspensionReason("");
+              setSuspensionNotes("");
+            }}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggleSuspension}
+              disabled={ownerToSuspend?.account_status !== "suspended" && !suspensionReason}
               className={
                 ownerToSuspend?.account_status === "suspended"
                   ? "bg-green-600 hover:bg-green-700"
