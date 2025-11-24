@@ -756,6 +756,47 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          icon_name: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           capacity: number
@@ -773,6 +814,7 @@ export type Database = {
           registration_number: string | null
           road_license_expiry: string
           status: Database["public"]["Enums"]["vehicle_status"]
+          subcategory_id: string | null
           tsv_psv_licence_expiry: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at: string
@@ -794,6 +836,7 @@ export type Database = {
           registration_number?: string | null
           road_license_expiry: string
           status?: Database["public"]["Enums"]["vehicle_status"]
+          subcategory_id?: string | null
           tsv_psv_licence_expiry?: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string
@@ -815,6 +858,7 @@ export type Database = {
           registration_number?: string | null
           road_license_expiry?: string
           status?: Database["public"]["Enums"]["vehicle_status"]
+          subcategory_id?: string | null
           tsv_psv_licence_expiry?: string | null
           type?: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string
@@ -826,6 +870,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_subcategories"
             referencedColumns: ["id"]
           },
         ]

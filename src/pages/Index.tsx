@@ -22,15 +22,32 @@ const Index = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [vehicleType, setVehicleType] = useState<string>("");
-  const [destination, setDestination] = useState<string>("");
+  const [vehicleSubCategory, setVehicleSubCategory] = useState<string>("");
+  const [startLocation, setStartLocation] = useState<string>("");
   const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFeaturedVehicles();
     fetchHeroSlides();
+    fetchSubCategories();
   }, []);
+
+  const fetchSubCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicle_subcategories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      setSubCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+    }
+  };
 
   const fetchHeroSlides = async () => {
     try {
@@ -129,7 +146,8 @@ const Index = () => {
     if (startDate) params.set("startDate", format(startDate, "yyyy-MM-dd"));
     if (endDate) params.set("endDate", format(endDate, "yyyy-MM-dd"));
     if (vehicleType) params.set("vehicleType", vehicleType);
-    if (destination) params.set("destination", destination);
+    if (vehicleSubCategory) params.set("vehicleSubCategory", vehicleSubCategory);
+    if (startLocation) params.set("startLocation", startLocation);
     
     navigate(`/vehicles?${params.toString()}`);
   };
@@ -194,6 +212,19 @@ const Index = () => {
         <div className="container mx-auto px-4 -mt-16 relative z-20">
           <Card className="p-4 shadow-xl bg-card">
             <div className="flex flex-wrap items-end gap-3">
+              {/* Start Location */}
+              <div className="flex-1 min-w-[200px]">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Start Location"
+                    value={startLocation}
+                    onChange={(e) => setStartLocation(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
               {/* Start Date */}
               <div className="flex-1 min-w-[180px]">
                 <Popover>
@@ -265,17 +296,20 @@ const Index = () => {
                 </Select>
               </div>
 
-              {/* Destination */}
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Destination"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+              {/* Vehicle Sub Category */}
+              <div className="flex-1 min-w-[180px]">
+                <Select value={vehicleSubCategory} onValueChange={setVehicleSubCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sub Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subCategories.map((subCat) => (
+                      <SelectItem key={subCat.id} value={subCat.id}>
+                        {subCat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Search Button */}
