@@ -23,6 +23,7 @@ const adminMenuItems = [
   { title: "Fleet Owners", url: "/admin/fleet-owners", icon: Building2 },
   { title: "Vehicle Categories", url: "/admin/categories", icon: FolderTree },
   { title: "Hero Slider", url: "/admin/hero-slider", icon: Image },
+  { title: "Blog", url: "/admin/blog", icon: FileCheck },
   { title: "Analytics", url: "/admin/analytics", icon: TrendingUp },
   { title: "Compliance", url: "/admin/compliance", icon: Shield },
 ];
