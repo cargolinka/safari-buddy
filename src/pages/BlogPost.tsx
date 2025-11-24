@@ -189,7 +189,10 @@ const BlogPost = () => {
               
               <div className="prose prose-lg max-w-none">
                 <p className="text-xl text-muted-foreground mb-8">{post.excerpt}</p>
-                <div className="whitespace-pre-wrap">{post.content}</div>
+                <div 
+                  className="blog-content"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
               </div>
 
               {post.tags && post.tags.length > 0 && (

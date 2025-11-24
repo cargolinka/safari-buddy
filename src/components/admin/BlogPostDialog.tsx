@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import RichTextEditor from "@/components/blog/RichTextEditor";
 
 interface BlogPostDialogProps {
   open: boolean;
@@ -185,7 +186,11 @@ const BlogPostDialog = ({ open, onOpenChange, post }: BlogPostDialogProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <Textarea id="content" {...register("content", { required: true })} rows={12} />
+            <RichTextEditor
+              content={watch("content")}
+              onChange={(content) => setValue("content", content)}
+              placeholder="Write your blog post content here..."
+            />
           </div>
 
           <div className="space-y-2">
