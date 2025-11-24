@@ -227,58 +227,30 @@ const Index = () => {
 
               {/* Start Date */}
               <div className="flex-1 min-w-[180px]">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PP") : "Start Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                      disabled={(date) => date < new Date()}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="relative">
+                  <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={startDate ? format(startDate, "yyyy-MM-dd") : ""}
+                    onChange={(e) => setStartDate(e.target.value ? new Date(e.target.value) : undefined)}
+                    placeholder="Start Date"
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               {/* End Date */}
               <div className="flex-1 min-w-[180px]">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PP") : "End Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      initialFocus
-                      disabled={(date) => date < (startDate || new Date())}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="relative">
+                  <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={endDate ? format(endDate, "yyyy-MM-dd") : ""}
+                    onChange={(e) => setEndDate(e.target.value ? new Date(e.target.value) : undefined)}
+                    placeholder="End Date"
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               {/* Vehicle Type */}
