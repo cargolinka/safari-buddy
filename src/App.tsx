@@ -23,6 +23,7 @@ import ComplianceMonitoring from "./pages/admin/ComplianceMonitoring";
 import PendingApprovals from "./pages/admin/PendingApprovals";
 import ManageHeroSlider from "./pages/admin/ManageHeroSlider";
 import CompanyDocumentVerification from "./pages/admin/CompanyDocumentVerification";
+import CreateTestData from "./pages/admin/CreateTestData";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="hero-slider" element={<ManageHeroSlider />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="compliance" element={<ComplianceMonitoring />} />
+              <Route path="test-data" element={<CreateTestData />} />
             </Route>
           
           {/* Owner Routes */}
