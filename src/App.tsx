@@ -24,6 +24,8 @@ import PendingApprovals from "./pages/admin/PendingApprovals";
 import ManageHeroSlider from "./pages/admin/ManageHeroSlider";
 import CompanyDocumentVerification from "./pages/admin/CompanyDocumentVerification";
 import CreateTestData from "./pages/admin/CreateTestData";
+import BlogPost from "./pages/BlogPost";
+import ManageBlog from "./pages/admin/ManageBlog";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -62,6 +64,7 @@ const App = () => (
           <Route path="/why-us" element={<WhyUs />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
@@ -77,6 +80,7 @@ const App = () => (
               <Route path="analytics" element={<Analytics />} />
               <Route path="compliance" element={<ComplianceMonitoring />} />
               <Route path="test-data" element={<CreateTestData />} />
+              <Route path="blog" element={<ManageBlog />} />
             </Route>
           
           {/* Owner Routes */}
