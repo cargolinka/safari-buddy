@@ -32,7 +32,9 @@ const Vehicles = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
   
+  const [startLocation, setStartLocation] = useState(searchParams.get("startLocation") || "");
   const [startDate, setStartDate] = useState<Date | undefined>(
     searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined
   );
@@ -40,11 +42,26 @@ const Vehicles = () => {
     searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined
   );
   const [vehicleType, setVehicleType] = useState(searchParams.get("vehicleType") || "");
-  const [destination, setDestination] = useState(searchParams.get("destination") || "");
+  const [vehicleSubCategory, setVehicleSubCategory] = useState(searchParams.get("vehicleSubCategory") || "");
 
   useEffect(() => {
+    fetchSubCategories();
     fetchVehicles();
-  }, [vehicleType, startDate, endDate]);
+  }, [vehicleType, vehicleSubCategory, startDate, endDate]);
+
+  const fetchSubCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicle_subcategories")
+        .select("*")
+        .order("name");
+      
+      if (error) throw error;
+      setSubCategories(data || []);
+    } catch (error: any) {
+      console.error("Failed to load subcategories:", error.message);
+    }
+  };
 
   const fetchVehicles = async () => {
     setLoading(true);
@@ -58,6 +75,11 @@ const Vehicles = () => {
       // Filter by vehicle type if selected
       if (vehicleType && vehicleType !== "" && vehicleType !== "all") {
         query = query.eq("type", vehicleType as any);
+      }
+
+      // Filter by vehicle subcategory if selected
+      if (vehicleSubCategory && vehicleSubCategory !== "" && vehicleSubCategory !== "all") {
+        query = query.eq("subcategory_id", vehicleSubCategory);
       }
 
       // If dates are selected, filter out vehicles that are already booked
@@ -87,10 +109,11 @@ const Vehicles = () => {
 
   const handleSearch = () => {
     const params: any = {};
+    if (startLocation) params.startLocation = startLocation;
     if (startDate) params.startDate = format(startDate, "yyyy-MM-dd");
     if (endDate) params.endDate = format(endDate, "yyyy-MM-dd");
     if (vehicleType) params.vehicleType = vehicleType;
-    if (destination) params.destination = destination;
+    if (vehicleSubCategory) params.vehicleSubCategory = vehicleSubCategory;
     
     setSearchParams(params);
     fetchVehicles();
@@ -109,6 +132,18 @@ const Vehicles = () => {
           <h1 className="text-3xl font-bold text-foreground mb-6">Browse Vehicles</h1>
           <Card className="p-4 shadow-lg bg-card">
             <div className="flex flex-wrap items-end gap-3">
+              <div className="flex-1 min-w-[200px]">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Start Location"
+                    value={startLocation}
+                    onChange={(e) => setStartLocation(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
               <div className="flex-1 min-w-[180px]">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -178,16 +213,20 @@ const Vehicles = () => {
                 </Select>
               </div>
 
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Destination"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+              <div className="flex-1 min-w-[160px]">
+                <Select value={vehicleSubCategory} onValueChange={setVehicleSubCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sub Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sub Categories</SelectItem>
+                    {subCategories.map((subCat) => (
+                      <SelectItem key={subCat.id} value={subCat.id}>
+                        {subCat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex-shrink-0">
@@ -225,9 +264,10 @@ const Vehicles = () => {
             <p className="text-muted-foreground mb-6">Try adjusting your search criteria</p>
             <Button onClick={() => {
               setVehicleType("all");
+              setVehicleSubCategory("all");
               setStartDate(undefined);
               setEndDate(undefined);
-              setDestination("");
+              setStartLocation("");
               setSearchParams({});
               fetchVehicles();
             }}>
