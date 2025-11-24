@@ -18,6 +18,7 @@ import ManageDrivers from "./pages/admin/ManageDrivers";
 import ManageVehicles from "./pages/admin/ManageVehicles";
 import ManageFleetOwners from "./pages/admin/ManageFleetOwners";
 import ManageCategories from "./pages/admin/ManageCategories";
+import ManageSubcategories from "./pages/admin/ManageSubcategories";
 import Analytics from "./pages/admin/Analytics";
 import ComplianceMonitoring from "./pages/admin/ComplianceMonitoring";
 import PendingApprovals from "./pages/admin/PendingApprovals";
@@ -76,6 +77,7 @@ const App = () => (
               <Route path="vehicles" element={<ManageVehicles />} />
               <Route path="fleet-owners" element={<ManageFleetOwners />} />
               <Route path="categories" element={<ManageCategories />} />
+              <Route path="subcategories" element={<ManageSubcategories />} />
               <Route path="hero-slider" element={<ManageHeroSlider />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="compliance" element={<ComplianceMonitoring />} />
