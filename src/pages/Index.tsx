@@ -19,8 +19,6 @@ import heroImage3 from "@/assets/hero-safari-3.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
   const [vehicleType, setVehicleType] = useState<string>("");
   const [vehicleSubCategory, setVehicleSubCategory] = useState<string>("");
   const [startLocation, setStartLocation] = useState<string>("");
@@ -143,8 +141,6 @@ const Index = () => {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (startDate) params.set("startDate", format(startDate, "yyyy-MM-dd"));
-    if (endDate) params.set("endDate", format(endDate, "yyyy-MM-dd"));
     if (vehicleType) params.set("vehicleType", vehicleType);
     if (vehicleSubCategory) params.set("vehicleSubCategory", vehicleSubCategory);
     if (startLocation) params.set("startLocation", startLocation);
@@ -220,34 +216,6 @@ const Index = () => {
                     placeholder="Start Location"
                     value={startLocation}
                     onChange={(e) => setStartLocation(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Start Date */}
-              <div className="flex-1 min-w-[180px]">
-                <div className="relative">
-                  <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="date"
-                    value={startDate ? format(startDate, "yyyy-MM-dd") : ""}
-                    onChange={(e) => setStartDate(e.target.value ? new Date(e.target.value) : undefined)}
-                    placeholder="Start Date"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* End Date */}
-              <div className="flex-1 min-w-[180px]">
-                <div className="relative">
-                  <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="date"
-                    value={endDate ? format(endDate, "yyyy-MM-dd") : ""}
-                    onChange={(e) => setEndDate(e.target.value ? new Date(e.target.value) : undefined)}
-                    placeholder="End Date"
                     className="pl-10"
                   />
                 </div>
