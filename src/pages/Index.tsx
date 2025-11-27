@@ -6,12 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building, DollarSign, Gavel, CheckCircle } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage1 from "@/assets/hero-safari.jpg";
 import heroImage2 from "@/assets/hero-safari-2.jpg";
@@ -321,7 +317,7 @@ const Index = () => {
             <Card className="border-border bg-card hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <Calendar className="w-6 h-6 text-primary" />
+                  <CalendarIcon className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle>Easy Booking</CardTitle>
               </CardHeader>
