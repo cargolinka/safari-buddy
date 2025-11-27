@@ -260,7 +260,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="bg-secondary">
+      <section className="bg-secondary pb-8">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -332,7 +332,7 @@ const Index = () => {
       </section>
 
       {/* Hire by Category Section */}
-      <section className="bg-background">
+      <section className="bg-background pb-8">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -595,7 +595,7 @@ const Index = () => {
       </section>
 
       {/* Latest Blogs Section */}
-      <section className="bg-background">
+      <section className="bg-background pb-8">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
             <div>
