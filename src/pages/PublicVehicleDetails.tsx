@@ -143,87 +143,42 @@ const PublicVehicleDetails = () => {
           Back
         </Button>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Column - Images */}
-          <div>
-            <div className="relative mb-4 rounded-lg overflow-hidden">
-              <Badge className="absolute top-4 right-4 z-10 bg-green-500">
-                {vehicle.status}
-              </Badge>
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Left Column - Image Gallery */}
+          <div className="space-y-4">
+            <div className="relative rounded-lg overflow-hidden bg-muted">
               {vehicle.image_urls && vehicle.image_urls.length > 0 ? (
                 <img
                   src={vehicle.image_urls[selectedImage]}
                   alt={vehicle.model}
-                  className="w-full h-96 object-cover"
+                  className="w-full h-[500px] object-cover"
                 />
               ) : (
-                <div className="w-full h-96 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <div className="w-full h-[500px] bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                   <DollarSign className="w-24 h-24 text-primary/40" />
                 </div>
               )}
             </div>
 
             {vehicle.image_urls && vehicle.image_urls.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="grid grid-cols-4 gap-3">
                 {vehicle.image_urls.map((url, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === idx ? "border-primary" : "border-transparent"
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${
+                      selectedImage === idx ? "border-primary ring-2 ring-primary/20" : "border-border"
                     }`}
                   >
                     <img
                       src={url}
                       alt={`${vehicle.model} ${idx + 1}`}
-                      className="w-20 h-20 object-cover"
+                      className="w-full h-20 object-cover"
                     />
                   </button>
                 ))}
               </div>
             )}
-
-            {/* Availability Calendar */}
-            <Card className="mt-6">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Availability Calendar</h3>
-                <div className="flex gap-4 mb-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
-                    <span>Available</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-red-500 rounded"></div>
-                    <span>Booked</span>
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Calendar
-                    mode="single"
-                    modifiers={{
-                      booked: (date) => isDateBooked(date)
-                    }}
-                    modifiersStyles={{
-                      booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
-                    }}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border"
-                  />
-                  <Calendar
-                    mode="single"
-                    month={addMonths(new Date(), 1)}
-                    modifiers={{
-                      booked: (date) => isDateBooked(date)
-                    }}
-                    modifiersStyles={{
-                      booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
-                    }}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border"
-                  />
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Right Column - Details */}
@@ -320,6 +275,48 @@ const PublicVehicleDetails = () => {
             )}
           </div>
         </div>
+
+        {/* Availability Calendar - Full Width Below */}
+        <Card className="mt-8">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Availability Calendar</h3>
+            <div className="flex gap-4 mb-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-500 rounded"></div>
+                <span>Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                <span>Booked</span>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Calendar
+                mode="single"
+                modifiers={{
+                  booked: (date) => isDateBooked(date)
+                }}
+                modifiersStyles={{
+                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
+                }}
+                disabled={(date) => date < new Date()}
+                className="rounded-md border"
+              />
+              <Calendar
+                mode="single"
+                month={addMonths(new Date(), 1)}
+                modifiers={{
+                  booked: (date) => isDateBooked(date)
+                }}
+                modifiersStyles={{
+                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
+                }}
+                disabled={(date) => date < new Date()}
+                className="rounded-md border"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
