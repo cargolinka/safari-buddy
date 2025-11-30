@@ -14,6 +14,7 @@ import { Calendar as CalendarIcon, MapPin, Users, DollarSign, Car } from "lucide
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import vehiclesHero from "@/assets/vehicles-hero.jpg";
 
 interface Vehicle {
   id: string;
@@ -126,10 +127,25 @@ const Vehicles = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Hero Image */}
+      <div className="relative h-96 overflow-hidden">
+        <img 
+          src={vehiclesHero} 
+          alt="Safari Vehicles" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end">
+          <div className="container mx-auto px-4 pb-12">
+            <h1 className="text-5xl font-bold text-white mb-4">Find Your Perfect Vehicle</h1>
+            <p className="text-xl text-white/90">Choose from our fleet of premium safari vehicles</p>
+          </div>
+        </div>
+      </div>
+
       {/* Search Bar */}
       <div className="bg-primary/10 border-b border-border">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-foreground mb-6">Browse Vehicles</h1>
           <Card className="p-4 shadow-lg bg-card">
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[200px]">
@@ -334,8 +350,8 @@ const Vehicles = () => {
                     )}
                     
                     <Button asChild className="w-full">
-                      <Link to={`/booking/${vehicle.id}`}>
-                        Book Now
+                      <Link to={`/vehicles/${vehicle.id}`}>
+                        View Details
                       </Link>
                     </Button>
                   </CardContent>
