@@ -144,8 +144,8 @@ const PublicVehicleDetails = () => {
         </Button>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Left Column - Image Gallery */}
-          <div className="space-y-4">
+          {/* Left Column - Image Gallery & Features */}
+          <div className="space-y-6">
             <div className="relative rounded-lg overflow-hidden bg-muted">
               {vehicle.image_urls && vehicle.image_urls.length > 0 ? (
                 <img
@@ -178,6 +178,23 @@ const PublicVehicleDetails = () => {
                   </button>
                 ))}
               </div>
+            )}
+
+            {/* Features */}
+            {vehicle.features && vehicle.features.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Features</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {vehicle.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
@@ -257,22 +274,6 @@ const PublicVehicleDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Features */}
-            {vehicle.features && vehicle.features.length > 0 && (
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Features</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {vehicle.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-primary" />
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
 
