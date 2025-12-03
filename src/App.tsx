@@ -48,6 +48,7 @@ import MyBidRequests from "./pages/client/MyBidRequests";
 import ViewBids from "./pages/client/ViewBids";
 import BrowseBidRequests from "./pages/driver/BrowseBidRequests";
 import SubmitBid from "./pages/driver/SubmitBid";
+import UpdatePassword from "./pages/UpdatePassword";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/vehicles" element={<Vehicles />} />
           <Route path="/vehicles/:id" element={<PublicVehicleDetails />} />
           <Route path="/empty-legs" element={<BrowseEmptyLegs />} />
