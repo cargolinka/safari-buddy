@@ -34,7 +34,34 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Trust that Dashboard.tsx already verified admin access before redirecting here
+    // Verify admin role from database
+    const { data: roles, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id);
+
+    if (error || !roles) {
+      toast({
+        title: "Error",
+        description: "Failed to verify admin access",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    const hasAdminRole = roles.some(r => r.role === 'admin');
+    
+    if (!hasAdminRole) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have admin privileges",
+        variant: "destructive",
+      });
+      navigate("/dashboard");
+      return;
+    }
+
     setIsAdmin(true);
     await fetchStats();
     setLoading(false);
