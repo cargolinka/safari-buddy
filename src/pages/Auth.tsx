@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COUNTRIES } from "@/lib/countries";
-import { Car } from "lucide-react";
+import { Car, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -17,6 +17,8 @@ const Auth = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -175,7 +177,36 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link.",
+      });
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getRoleTitle = () => {
+    if (showForgotPassword) return "Reset Password";
     if (preSelectedRole === "driver") return "Driver Portal";
     if (preSelectedRole === "owner") return "Vehicle Owner Portal";
     if (preSelectedRole === "client_individual") return "Client Portal";
@@ -183,6 +214,7 @@ const Auth = () => {
   };
 
   const getRoleDescription = () => {
+    if (showForgotPassword) return "Enter your email to receive a password reset link";
     if (preSelectedRole === "driver") return "Sign in to manage your trips and assignments";
     if (preSelectedRole === "owner") return "Sign in to manage your fleet and vehicles";
     if (preSelectedRole === "client_individual") return "Sign in to book vehicles and manage reservations";
@@ -199,6 +231,36 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {showForgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">Email</Label>
+                <Input
+                  id="resetEmail"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Sending..." : "Send Reset Link"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Sign In
+              </Button>
+            </form>
+          ) : (
+          <>
           <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(v) => setIsSignUp(v === "signup")}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -388,6 +450,16 @@ const Auth = () => {
                 />
               </div>
 
+              {!isSignUp && (
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot your password?
+                </button>
+              )}
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
               </Button>
@@ -408,6 +480,8 @@ const Auth = () => {
                 Register as Driver
               </Button>
             </div>
+          )}
+          </>
           )}
         </CardContent>
       </Card>
