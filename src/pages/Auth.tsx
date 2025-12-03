@@ -199,29 +199,6 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Driver Registration Section - Prominent at Top */}
-          {!preSelectedRole && (
-            <div className="mb-6 p-4 border-2 border-primary/20 rounded-lg bg-primary/5">
-              <div className="flex items-start gap-3">
-                <Car className="w-5 h-5 text-primary mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground mb-1">Professional Driver?</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Register with your license and documents to start driving
-                  </p>
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={() => navigate('/driver/register')}
-                    type="button"
-                  >
-                    <Car className="w-4 h-4 mr-2" />
-                    Register as Driver
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
           <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(v) => setIsSignUp(v === "signup")}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -290,7 +267,6 @@ const Auth = () => {
                             <SelectItem value="client_individual">Client (Individual)</SelectItem>
                             <SelectItem value="client_corporate">Client (Corporate)</SelectItem>
                             <SelectItem value="owner">Vehicle Owner</SelectItem>
-                            <SelectItem value="driver">Driver</SelectItem>
                           </>
                         )}
                       </SelectContent>
@@ -417,6 +393,22 @@ const Auth = () => {
               </Button>
             </form>
           </Tabs>
+
+          {/* Driver Registration Link - Subtle at bottom */}
+          {!preSelectedRole && (
+            <div className="mt-6 pt-4 border-t text-center">
+              <p className="text-sm text-muted-foreground mb-2">Are you a professional driver?</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/driver/register')}
+                type="button"
+              >
+                <Car className="w-4 h-4 mr-2" />
+                Register as Driver
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
