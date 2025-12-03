@@ -38,7 +38,9 @@ export function useRoleVerification({
         const { data: { session: currentSession } } = await supabase.auth.getSession();
 
         if (!currentSession) {
-          navigate("/auth");
+          // Redirect to auth with return URL for role-specific pages
+          const authUrl = requiredRole === 'admin' ? '/auth?redirect=/admin' : '/auth';
+          navigate(authUrl);
           return;
         }
 
