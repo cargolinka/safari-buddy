@@ -6,11 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Car, Calendar, DollarSign, LogOut, AlertTriangle, CheckCircle, MapPin, Gavel } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRoleVerification } from "@/hooks/useRoleVerification";
 
 export default function DriverDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
+  
+  const { loading, isAuthorized, session } = useRoleVerification({ requiredRole: "driver" });
+  
   const [driver, setDriver] = useState<any>(null);
   const [stats, setStats] = useState({
     totalTrips: 0,
@@ -20,50 +23,15 @@ export default function DriverDashboard() {
   const [upcomingTrips, setUpcomingTrips] = useState<any[]>([]);
 
   useEffect(() => {
-    checkAuth();
-    fetchDriverData();
-    fetchStats();
-    fetchUpcomingTrips();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
+    if (isAuthorized && session) {
+      fetchDriverData();
+      fetchStats();
+      fetchUpcomingTrips();
     }
-
-    const { data: roles, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id);
-
-    if (error || !roles) {
-      toast({
-        title: "Error",
-        description: "Failed to verify access",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const hasDriverRole = roles.some(r => r.role === 'driver');
-    
-    if (!hasDriverRole) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have driver privileges",
-        variant: "destructive",
-      });
-      navigate("/dashboard");
-      return;
-    }
-  };
+  }, [isAuthorized, session]);
 
   const fetchDriverData = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data, error } = await supabase
@@ -76,8 +44,6 @@ export default function DriverDashboard() {
       setDriver(data);
     } catch (error: any) {
       console.error("Error loading driver data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 

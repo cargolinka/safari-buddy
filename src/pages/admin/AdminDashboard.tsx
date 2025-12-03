@@ -7,14 +7,16 @@ import { Users, Car, FileCheck, AlertCircle, TrendingUp, LogOut } from "lucide-r
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { useRoleVerification } from "@/hooks/useRoleVerification";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const isAdminRoot = location.pathname === "/admin";
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  const { loading, isAuthorized } = useRoleVerification({ requiredRole: "admin" });
+  
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalVehicles: 0,
@@ -23,49 +25,10 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    checkAdminAccess();
-  }, []);
-
-  const checkAdminAccess = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      navigate("/auth");
-      return;
+    if (isAuthorized) {
+      fetchStats();
     }
-
-    // Verify admin role from database
-    const { data: roles, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id);
-
-    if (error || !roles) {
-      toast({
-        title: "Error",
-        description: "Failed to verify admin access",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const hasAdminRole = roles.some(r => r.role === 'admin');
-    
-    if (!hasAdminRole) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have admin privileges",
-        variant: "destructive",
-      });
-      navigate("/dashboard");
-      return;
-    }
-
-    setIsAdmin(true);
-    await fetchStats();
-    setLoading(false);
-  };
+  }, [isAuthorized]);
 
   const fetchStats = async () => {
     try {
@@ -121,7 +84,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (!isAdmin) {
+  if (!isAuthorized) {
     return null;
   }
 
