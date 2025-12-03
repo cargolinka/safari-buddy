@@ -39,9 +39,10 @@ interface SubcategoryDialogProps {
   categories: Category[];
   subcategory?: Subcategory;
   onSuccess: () => void;
+  defaultCategoryId?: string;
 }
 
-const SubcategoryDialog = ({ categories, subcategory, onSuccess }: SubcategoryDialogProps) => {
+const SubcategoryDialog = ({ categories, subcategory, onSuccess, defaultCategoryId }: SubcategoryDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,21 +51,30 @@ const SubcategoryDialog = ({ categories, subcategory, onSuccess }: SubcategoryDi
     defaultValues: {
       name: subcategory?.name || "",
       description: subcategory?.description || "",
-      category_id: subcategory?.category_id || "",
+      category_id: subcategory?.category_id || defaultCategoryId || "",
       icon_name: subcategory?.icon_name || "Car",
     },
   });
 
   useEffect(() => {
-    if (subcategory && open) {
-      form.reset({
-        name: subcategory.name,
-        description: subcategory.description || "",
-        category_id: subcategory.category_id,
-        icon_name: subcategory.icon_name || "Car",
-      });
+    if (open) {
+      if (subcategory) {
+        form.reset({
+          name: subcategory.name,
+          description: subcategory.description || "",
+          category_id: subcategory.category_id,
+          icon_name: subcategory.icon_name || "Car",
+        });
+      } else {
+        form.reset({
+          name: "",
+          description: "",
+          category_id: defaultCategoryId || "",
+          icon_name: "Car",
+        });
+      }
     }
-  }, [subcategory, open, form]);
+  }, [subcategory, open, form, defaultCategoryId]);
 
   const generateSlug = (name: string) => {
     return name
