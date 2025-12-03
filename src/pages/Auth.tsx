@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COUNTRIES } from "@/lib/countries";
-import { Car, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -469,21 +469,6 @@ const Auth = () => {
             </form>
           </Tabs>
 
-          {/* Driver Registration Link - Subtle at bottom */}
-          {!preSelectedRole && (
-            <div className="mt-6 pt-4 border-t text-center">
-              <p className="text-sm text-muted-foreground mb-2">Are you a professional driver?</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/driver/register')}
-                type="button"
-              >
-                <Car className="w-4 h-4 mr-2" />
-                Register as Driver
-              </Button>
-            </div>
-          )}
           </>
           )}
         </CardContent>
