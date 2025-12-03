@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Car, FileCheck, Calendar, DollarSign, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRoleVerification } from "@/hooks/useRoleVerification";
 
 export default function OwnerDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
+  
+  const { loading, isAuthorized, session } = useRoleVerification({ requiredRole: "owner" });
+  
   const [stats, setStats] = useState({
     totalVehicles: 0,
     compliantVehicles: 0,
@@ -18,44 +21,10 @@ export default function OwnerDashboard() {
   });
 
   useEffect(() => {
-    checkAuth();
-    fetchStats();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
+    if (isAuthorized && session) {
+      fetchStats();
     }
-
-    const { data: roles, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id);
-
-    if (error || !roles) {
-      toast({
-        title: "Error",
-        description: "Failed to verify access",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const hasOwnerRole = roles.some(r => r.role === 'owner');
-    
-    if (!hasOwnerRole) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have owner privileges",
-        variant: "destructive",
-      });
-      navigate("/dashboard");
-      return;
-    }
-  };
+  }, [isAuthorized, session]);
 
   const fetchStats = async () => {
     try {
@@ -105,8 +74,6 @@ export default function OwnerDashboard() {
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
