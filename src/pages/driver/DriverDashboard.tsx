@@ -33,14 +33,31 @@ export default function DriverDashboard() {
       return;
     }
 
-    const { data: roleData } = await supabase
+    const { data: roles, error } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", session.user.id)
-      .single();
+      .eq("user_id", session.user.id);
 
-    if (roleData?.role !== "driver") {
+    if (error || !roles) {
+      toast({
+        title: "Error",
+        description: "Failed to verify access",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    const hasDriverRole = roles.some(r => r.role === 'driver');
+    
+    if (!hasDriverRole) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have driver privileges",
+        variant: "destructive",
+      });
       navigate("/dashboard");
+      return;
     }
   };
 
