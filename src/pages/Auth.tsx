@@ -15,6 +15,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const redirectTo = searchParams.get("redirect");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -164,7 +165,7 @@ const Auth = () => {
           description: "Successfully signed in",
         });
 
-        navigate("/dashboard");
+        navigate(redirectTo || "/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -207,6 +208,7 @@ const Auth = () => {
 
   const getRoleTitle = () => {
     if (showForgotPassword) return "Reset Password";
+    if (redirectTo === "/admin") return "Admin Portal";
     if (preSelectedRole === "driver") return "Driver Portal";
     if (preSelectedRole === "owner") return "Vehicle Owner Portal";
     if (preSelectedRole === "client_individual") return "Client Portal";
@@ -215,6 +217,7 @@ const Auth = () => {
 
   const getRoleDescription = () => {
     if (showForgotPassword) return "Enter your email to receive a password reset link";
+    if (redirectTo === "/admin") return "Sign in to access the admin dashboard";
     if (preSelectedRole === "driver") return "Sign in to manage your trips and assignments";
     if (preSelectedRole === "owner") return "Sign in to manage your fleet and vehicles";
     if (preSelectedRole === "client_individual") return "Sign in to book vehicles and manage reservations";
