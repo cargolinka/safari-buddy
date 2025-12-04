@@ -20,14 +20,45 @@ const Index = () => {
   const [startLocation, setStartLocation] = useState<string>("");
   const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [filteredSubCategories, setFilteredSubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFeaturedVehicles();
     fetchHeroSlides();
+    fetchCategories();
     fetchSubCategories();
   }, []);
+
+  // Filter subcategories when vehicle type (category) changes
+  useEffect(() => {
+    if (vehicleType) {
+      const filtered = subCategories.filter(sub => sub.category_id === vehicleType);
+      setFilteredSubCategories(filtered);
+      // Reset subcategory if it doesn't belong to the selected category
+      if (vehicleSubCategory && !filtered.find(sub => sub.id === vehicleSubCategory)) {
+        setVehicleSubCategory("");
+      }
+    } else {
+      setFilteredSubCategories(subCategories);
+    }
+  }, [vehicleType, subCategories]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicle_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchSubCategories = async () => {
     try {
@@ -217,17 +248,18 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Vehicle Type */}
+              {/* Vehicle Type (Category) */}
               <div className="flex-1 min-w-[160px]">
                 <Select value={vehicleType} onValueChange={setVehicleType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Vehicle Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="land_cruiser">Land Cruiser</SelectItem>
-                    <SelectItem value="tour_van">Tour Van</SelectItem>
-                    <SelectItem value="bus">Bus</SelectItem>
-                    <SelectItem value="saloon">Saloon</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -239,7 +271,7 @@ const Index = () => {
                     <SelectValue placeholder="Sub Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subCategories.map((subCat) => (
+                    {filteredSubCategories.map((subCat) => (
                       <SelectItem key={subCat.id} value={subCat.id}>
                         {subCat.name}
                       </SelectItem>
