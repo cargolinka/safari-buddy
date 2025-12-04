@@ -21,17 +21,29 @@ export default function PendingApprovals() {
       // Fetch pending drivers (those not yet compliant)
       const { data: driversData, error: driversError } = await supabase
         .from('drivers')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            phone
-          )
-        `)
+        .select('*')
         .or('is_compliant.is.null,is_compliant.eq.false')
         .eq('status', 'unavailable');
 
       if (driversError) throw driversError;
+
+      // Fetch profiles for these drivers
+      let driversWithProfiles: any[] = [];
+      if (driversData && driversData.length > 0) {
+        const driverIds = driversData.map(d => d.id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone')
+          .in('id', driverIds);
+
+        if (profilesError) throw profilesError;
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        driversWithProfiles = driversData.map(driver => ({
+          ...driver,
+          profiles: profilesMap.get(driver.id) || { full_name: 'Unknown', phone: null }
+        }));
+      }
 
       // Fetch pending companies (with unverified documents)
       const { data: companiesData, error: companiesError } = await supabase
@@ -51,7 +63,7 @@ export default function PendingApprovals() {
         company.company_documents?.some((doc: any) => !doc.verified_by_admin)
       ) || [];
 
-      setPendingDrivers(driversData || []);
+      setPendingDrivers(driversWithProfiles);
       setPendingCompanies(pendingCompaniesFiltered);
     } catch (error: any) {
       toast({
