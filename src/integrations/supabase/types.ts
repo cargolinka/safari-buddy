@@ -441,6 +441,39 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_requirements: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          name: string
+          requirement_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          name: string
+          requirement_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          name?: string
+          requirement_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       driver_vehicle_assignments: {
         Row: {
           driver_id: string

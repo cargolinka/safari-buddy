@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { PendingDriverApprovals } from "@/components/admin/PendingDriverApprovals";
 import { AddDriverDialog } from "@/components/admin/AddDriverDialog";
 import { EditDriverDialog } from "@/components/admin/EditDriverDialog";
+import { DriverRequirementsSection } from "@/components/admin/DriverRequirementsSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { COUNTRIES } from "@/lib/countries";
 import { Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ManageDrivers = () => {
   const { toast } = useToast();
@@ -96,68 +98,81 @@ const ManageDrivers = () => {
         <AddDriverDialog onSuccess={fetchDrivers} />
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or license..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Countries</SelectItem>
-            {COUNTRIES.map((country) => (
-              <SelectItem key={country.code} value={country.name}>
-                {country.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Tabs defaultValue="drivers" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="drivers">Drivers</TabsTrigger>
+          <TabsTrigger value="requirements">Requirements</TabsTrigger>
+        </TabsList>
 
-      <PendingDriverApprovals drivers={filteredPendingDrivers} onUpdate={fetchDrivers} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>All Drivers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div>Loading...</div>
-          ) : (
-            <div className="space-y-4">
-              {filteredDrivers.map((driver) => (
-                <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium">{driver.profiles?.full_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {driver.profiles?.email && `${driver.profiles.email} • `}
-                      {driver.profiles?.country && `${driver.profiles.country}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">License: {driver.license_number}</p>
-                    <p className="text-sm text-muted-foreground">Expiry: {driver.license_expiry}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={driver.is_compliant ? "default" : "destructive"}>
-                      {driver.is_compliant ? "Compliant" : "Non-compliant"}
-                    </Badge>
-                    <Badge variant={driver.status === "available" ? "default" : "secondary"}>
-                      {driver.status}
-                    </Badge>
-                    <EditDriverDialog driver={driver} onSuccess={fetchDrivers} />
-                  </div>
-                </div>
-              ))}
+        <TabsContent value="drivers" className="space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or license..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {COUNTRIES.map((country) => (
+                  <SelectItem key={country.code} value={country.name}>
+                    {country.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <PendingDriverApprovals drivers={filteredPendingDrivers} onUpdate={fetchDrivers} />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>All Drivers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div>Loading...</div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredDrivers.map((driver) => (
+                    <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium">{driver.profiles?.full_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {driver.profiles?.email && `${driver.profiles.email} • `}
+                          {driver.profiles?.country && `${driver.profiles.country}`}
+                        </p>
+                        <p className="text-sm text-muted-foreground">License: {driver.license_number}</p>
+                        <p className="text-sm text-muted-foreground">Expiry: {driver.license_expiry}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={driver.is_compliant ? "default" : "destructive"}>
+                          {driver.is_compliant ? "Compliant" : "Non-compliant"}
+                        </Badge>
+                        <Badge variant={driver.status === "available" ? "default" : "secondary"}>
+                          {driver.status}
+                        </Badge>
+                        <EditDriverDialog driver={driver} onSuccess={fetchDrivers} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="requirements">
+          <DriverRequirementsSection />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
