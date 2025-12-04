@@ -26,17 +26,29 @@ const ManageDrivers = () => {
       // Fetch all drivers
       const { data: allDrivers, error: allError } = await supabase
         .from("drivers")
-        .select(`
-          *,
-          profiles!inner (full_name, phone, country, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (allError) throw allError;
+
+      // Fetch profiles for the drivers
+      const driverIds = (allDrivers || []).map(d => d.id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone, country, email")
+        .in("id", driverIds);
+
+      if (profilesError) throw profilesError;
+
+      // Merge profiles with drivers
+      const driversWithProfiles = (allDrivers || []).map(driver => ({
+        ...driver,
+        profiles: profiles?.find(p => p.id === driver.id) || null
+      }));
       
-      // Separate non-compliant/pending from all (assuming non-compliant means pending verification)
-      const pending = (allDrivers || []).filter(d => !d.is_compliant);
-      const approved = (allDrivers || []).filter(d => d.is_compliant);
+      // Separate non-compliant/pending from all
+      const pending = driversWithProfiles.filter(d => !d.is_compliant);
+      const approved = driversWithProfiles.filter(d => d.is_compliant);
       
       setPendingDrivers(pending);
       setDrivers(approved);
