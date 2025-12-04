@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { PendingDriverApprovals } from "@/components/admin/PendingDriverApprovals";
 import { AddDriverDialog } from "@/components/admin/AddDriverDialog";
 import { EditDriverDialog } from "@/components/admin/EditDriverDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { COUNTRIES } from "@/lib/countries";
+import { Search } from "lucide-react";
 
 const ManageDrivers = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const ManageDrivers = () => {
   const [pendingDrivers, setPendingDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     fetchDrivers();
@@ -63,13 +65,26 @@ const ManageDrivers = () => {
     }
   };
 
-  const filteredDrivers = selectedCountry === "all" 
-    ? drivers 
-    : drivers.filter(d => d.profiles?.country === selectedCountry);
+  const filterBySearch = (driversList: any[]) => {
+    if (!searchQuery.trim()) return driversList;
+    const query = searchQuery.toLowerCase();
+    return driversList.filter(d => 
+      d.profiles?.full_name?.toLowerCase().includes(query) ||
+      d.license_number?.toLowerCase().includes(query)
+    );
+  };
 
-  const filteredPendingDrivers = selectedCountry === "all"
-    ? pendingDrivers
-    : pendingDrivers.filter(d => d.profiles?.country === selectedCountry);
+  const filteredDrivers = filterBySearch(
+    selectedCountry === "all" 
+      ? drivers 
+      : drivers.filter(d => d.profiles?.country === selectedCountry)
+  );
+
+  const filteredPendingDrivers = filterBySearch(
+    selectedCountry === "all"
+      ? pendingDrivers
+      : pendingDrivers.filter(d => d.profiles?.country === selectedCountry)
+  );
 
   return (
     <div className="space-y-6">
@@ -82,6 +97,15 @@ const ManageDrivers = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or license..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <Select value={selectedCountry} onValueChange={setSelectedCountry}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by country" />
