@@ -186,8 +186,11 @@ const Index = () => {
               <CarouselItem key={slide.id}>
                 <div className="relative h-[70vh] flex items-center justify-center">
                   <div 
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${slide.image_url})` }}
+                    className="absolute inset-0 bg-cover"
+                    style={{ 
+                      backgroundImage: `url(${slide.image_url})`,
+                      backgroundPosition: `${slide.image_position_x ?? 50}% ${slide.image_position_y ?? 50}%`
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                   
