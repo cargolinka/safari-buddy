@@ -188,9 +188,8 @@ const Index = () => {
                   <div 
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url(${slide.image_url})` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-background" />
-                  </div>
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                   
                   <div className="relative z-10 container mx-auto px-4 text-center">
                     <Badge className="mb-6 bg-accent text-accent-foreground">
@@ -388,7 +387,7 @@ const Index = () => {
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   <category.icon className="absolute bottom-4 right-4 h-8 w-8 text-white opacity-80" />
                 </div>
                 <CardHeader>
