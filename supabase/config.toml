@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.expire-empty-legs]
 verify_jwt = false
+
+[functions.send-driver-welcome-email]
+verify_jwt = false
