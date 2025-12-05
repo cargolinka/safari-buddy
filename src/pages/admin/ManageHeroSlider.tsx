@@ -40,6 +40,8 @@ interface HeroSlide {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  image_position_x: number;
+  image_position_y: number;
 }
 
 export default function ManageHeroSlider() {

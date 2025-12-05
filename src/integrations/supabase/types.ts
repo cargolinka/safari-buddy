@@ -635,6 +635,8 @@ export type Database = {
           description: string
           display_order: number
           id: string
+          image_position_x: number
+          image_position_y: number
           image_url: string
           is_active: boolean
           secondary_button_link: string | null
@@ -650,6 +652,8 @@ export type Database = {
           description: string
           display_order?: number
           id?: string
+          image_position_x?: number
+          image_position_y?: number
           image_url: string
           is_active?: boolean
           secondary_button_link?: string | null
@@ -665,6 +669,8 @@ export type Database = {
           description?: string
           display_order?: number
           id?: string
+          image_position_x?: number
+          image_position_y?: number
           image_url?: string
           is_active?: boolean
           secondary_button_link?: string | null
