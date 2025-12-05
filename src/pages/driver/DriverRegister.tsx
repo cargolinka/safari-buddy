@@ -232,7 +232,18 @@ export default function DriverRegister() {
         }
       ]);
 
-      toast.success("Registration successful! Your profile is under review.");
+      // Send welcome email (non-blocking)
+      supabase.functions.invoke('send-driver-welcome-email', {
+        body: {
+          email: email.toLowerCase().trim(),
+          fullName,
+          isVehicleOwner: ownsVehicles,
+        },
+      }).then(({ error }) => {
+        if (error) console.error('Welcome email error:', error);
+      });
+
+      toast.success("Registration successful! Check your email for confirmation.");
       navigate('/driver/dashboard');
     } catch (error: any) {
       console.error('Registration error:', error);
