@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-driver-welcome-email]
 verify_jwt = false
+
+[functions.notify-admin-new-driver]
+verify_jwt = false

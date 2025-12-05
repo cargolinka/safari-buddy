@@ -232,7 +232,7 @@ export default function DriverRegister() {
         }
       ]);
 
-      // Send welcome email (non-blocking)
+      // Send welcome email to driver (non-blocking)
       supabase.functions.invoke('send-driver-welcome-email', {
         body: {
           email: email.toLowerCase().trim(),
@@ -241,6 +241,22 @@ export default function DriverRegister() {
         },
       }).then(({ error }) => {
         if (error) console.error('Welcome email error:', error);
+      });
+
+      // Notify admins of new registration (non-blocking)
+      supabase.functions.invoke('notify-admin-new-driver', {
+        body: {
+          driverName: fullName,
+          driverEmail: email.toLowerCase().trim(),
+          driverPhone: phone,
+          country,
+          licenseNumber,
+          isVehicleOwner: ownsVehicles,
+          entityType: ownsVehicles ? entityType : 'individual',
+          companyName: ownsVehicles && entityType === 'company' ? companyName : undefined,
+        },
+      }).then(({ error }) => {
+        if (error) console.error('Admin notification error:', error);
       });
 
       toast.success("Registration successful! Check your email for confirmation.");
