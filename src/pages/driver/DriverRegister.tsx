@@ -132,9 +132,22 @@ export default function DriverRegister() {
 
     setLoading(true);
     try {
+      // Pre-check: Verify email doesn't already exist in profiles
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (existingProfile) {
+        toast.error("An account with this email already exists. Please sign in instead or use a different email.");
+        setLoading(false);
+        return;
+      }
+
       // 1. Create auth account
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
+        email: email.toLowerCase().trim(),
         password,
         options: {
           data: {
@@ -144,7 +157,16 @@ export default function DriverRegister() {
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Handle specific Supabase auth errors
+        if (signUpError.message.includes('already registered')) {
+          toast.error("This email is already registered. Please sign in instead.");
+          setLoading(false);
+          return;
+        }
+        throw signUpError;
+      }
+      
       if (!authData.user) throw new Error("User creation failed");
 
       const userId = authData.user.id;
