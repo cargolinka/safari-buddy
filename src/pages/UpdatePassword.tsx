@@ -1,55 +1,81 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, CheckCircle } from "lucide-react";
+import { Lock, CheckCircle, AlertCircle } from "lucide-react";
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isValidSession, setIsValidSession] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [isValidToken, setIsValidToken] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  const [checkingToken, setCheckingToken] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
+
+  const token = searchParams.get("token");
 
   useEffect(() => {
-    // Check if user has a valid recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        setIsValidSession(true);
+    const verifyToken = async () => {
+      // Check for custom token first
+      if (token) {
+        try {
+          const response = await supabase.functions.invoke('verify-reset-token', {
+            body: { token }
+          });
+
+          if (response.error) {
+            setTokenError(response.error.message || "Invalid reset link");
+            setIsValidToken(false);
+          } else if (response.data?.valid) {
+            setIsValidToken(true);
+            setUserEmail(response.data.email || "");
+          } else if (response.data?.error) {
+            setTokenError(response.data.error);
+            setIsValidToken(false);
+          }
+        } catch (error: any) {
+          console.error("Token verification error:", error);
+          setTokenError("Failed to verify reset link");
+          setIsValidToken(false);
+        }
       } else {
-        toast({
-          title: "Invalid or Expired Link",
-          description: "Please request a new password reset link.",
-          variant: "destructive",
-        });
-        navigate("/auth");
+        // Fallback: check for Supabase auth recovery session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsValidToken(true);
+          setUserEmail(session.user.email || "");
+        } else {
+          setTokenError("Invalid or expired reset link");
+          setIsValidToken(false);
+        }
       }
-      setCheckingSession(false);
+      setCheckingToken(false);
     };
 
-    // Listen for auth state changes (recovery token exchange)
+    // Listen for auth state changes (for Supabase recovery flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
-          setIsValidSession(true);
-          setCheckingSession(false);
+        if (event === "PASSWORD_RECOVERY" && session) {
+          setIsValidToken(true);
+          setUserEmail(session.user.email || "");
+          setCheckingToken(false);
         }
       }
     );
 
-    checkSession();
+    verifyToken();
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [token]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,11 +101,31 @@ const UpdatePassword = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
+      if (token) {
+        // Use custom token flow
+        const response = await supabase.functions.invoke('verify-reset-token', {
+          body: { token, newPassword: password }
+        });
 
-      if (error) throw error;
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+
+        if (response.data?.error) {
+          throw new Error(response.data.error);
+        }
+
+        if (!response.data?.success) {
+          throw new Error("Failed to update password");
+        }
+      } else {
+        // Use Supabase auth flow
+        const { error } = await supabase.auth.updateUser({
+          password: password,
+        });
+
+        if (error) throw error;
+      }
 
       setIsSuccess(true);
       toast({
@@ -97,7 +143,7 @@ const UpdatePassword = () => {
     }
   };
 
-  if (checkingSession) {
+  if (checkingToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="text-lg">Verifying reset link...</div>
@@ -105,8 +151,30 @@ const UpdatePassword = () => {
     );
   }
 
-  if (!isValidSession) {
-    return null;
+  if (!isValidToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-destructive" />
+            </div>
+            <CardTitle className="text-2xl">Invalid Reset Link</CardTitle>
+            <CardDescription>
+              {tokenError || "This password reset link is invalid or has expired."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              className="w-full" 
+              onClick={() => navigate("/auth")}
+            >
+              Request New Reset Link
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -130,7 +198,7 @@ const UpdatePassword = () => {
               </div>
               <CardTitle className="text-2xl">Set New Password</CardTitle>
               <CardDescription>
-                Enter your new password below.
+                {userEmail ? `Enter a new password for ${userEmail}` : "Enter your new password below."}
               </CardDescription>
             </>
           )}
