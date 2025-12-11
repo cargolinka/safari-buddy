@@ -27,6 +27,14 @@ interface Vehicle {
   status: string;
   is_compliant: boolean;
   registration_number: string | null;
+  image_url: string | null;
+  image_urls: string[] | null;
+  vehicle_subcategories?: {
+    name: string;
+    vehicle_categories?: {
+      name: string;
+    };
+  } | null;
 }
 
 const Vehicles = () => {
@@ -69,7 +77,10 @@ const Vehicles = () => {
     try {
       let query = supabase
         .from("vehicles")
-        .select("*")
+        .select(`
+          *,
+          vehicle_subcategories(name, vehicle_categories(name))
+        `)
         .eq("status", "available")
         .eq("is_compliant", true);
 
@@ -300,42 +311,71 @@ const Vehicles = () => {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {vehicles.map((vehicle) => (
-                <Card key={vehicle.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Car className="w-24 h-24 text-primary/40" />
+                <Card key={vehicle.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 shadow-md group">
+                  <div className="relative h-52 overflow-hidden bg-muted">
+                    {(vehicle.image_urls?.[0] || vehicle.image_url) ? (
+                      <img 
+                        src={vehicle.image_urls?.[0] || vehicle.image_url} 
+                        alt={vehicle.model}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                        <Car className="h-20 w-20 text-muted-foreground/50" />
+                      </div>
+                    )}
+                    {/* Gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* Category badge - top left */}
+                    {vehicle.vehicle_subcategories?.vehicle_categories?.name && (
+                      <Badge className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-primary-foreground font-medium shadow-lg">
+                        {vehicle.vehicle_subcategories.vehicle_categories.name}
+                      </Badge>
+                    )}
+                    
+                    {/* Available badge - top right */}
+                    <Badge className="absolute top-3 right-3 bg-green-600/90 backdrop-blur-sm text-white shadow-lg">
+                      Available
+                    </Badge>
+                    
+                    {/* Subcategory badge - bottom left */}
+                    {vehicle.vehicle_subcategories?.name && (
+                      <Badge variant="outline" className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-foreground border-0 shadow-lg font-medium">
+                        {vehicle.vehicle_subcategories.name}
+                      </Badge>
+                    )}
+                    
+                    {/* Price badge - bottom right */}
+                    <div className="absolute bottom-3 right-3 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
+                      <span className="text-lg font-bold text-primary">
+                        KES {Number(vehicle.daily_rate).toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/day</span>
+                    </div>
                   </div>
                   
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl">{vehicle.model}</CardTitle>
-                        <CardDescription className="space-y-1">
-                          <div>{vehicle.year}</div>
-                          {vehicle.registration_number && (
-                            <div className="font-mono text-primary font-medium">
-                              {vehicle.registration_number}
-                            </div>
-                          )}
-                        </CardDescription>
-                      </div>
-                      <Badge variant="secondary">{formatVehicleType(vehicle.type)}</Badge>
-                    </div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-1">
+                      {vehicle.model}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-3">
+                      <span>{vehicle.year}</span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        {vehicle.capacity} seats
+                      </span>
+                      {vehicle.registration_number && (
+                        <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">
+                          {vehicle.registration_number}
+                        </span>
+                      )}
+                    </CardDescription>
                   </CardHeader>
                   
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{vehicle.capacity} seats</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4" />
-                        <span>${vehicle.daily_rate}/day</span>
-                      </div>
-                    </div>
-                    
+                  <CardContent className="pt-0 space-y-3">
                     {vehicle.features && vehicle.features.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {vehicle.features.slice(0, 3).map((feature, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
                             {feature}
@@ -343,7 +383,7 @@ const Vehicles = () => {
                         ))}
                         {vehicle.features.length > 3 && (
                           <Badge variant="outline" className="text-xs">
-                            +{vehicle.features.length - 3} more
+                            +{vehicle.features.length - 3}
                           </Badge>
                         )}
                       </div>
