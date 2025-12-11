@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
-import { ArrowLeft, MapPin, Users, DollarSign, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, Users, DollarSign, CheckCircle2, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, addDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
@@ -162,14 +162,44 @@ const PublicVehicleDetails = () => {
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Left Column - Image Gallery & Features */}
-          <div className="space-y-6">
-            <div className="relative rounded-lg overflow-hidden bg-muted">
+          <div className="space-y-4">
+            {/* Main Image with Navigation Arrows */}
+            <div className="relative rounded-xl overflow-hidden bg-muted group">
               {vehicle.image_urls && vehicle.image_urls.length > 0 ? (
-                <img
-                  src={vehicle.image_urls[selectedImage]}
-                  alt={vehicle.model}
-                  className="w-full h-[500px] object-cover"
-                />
+                <>
+                  <img
+                    src={vehicle.image_urls[selectedImage]}
+                    alt={vehicle.model}
+                    className="w-full h-[500px] object-cover transition-transform duration-500"
+                  />
+                  
+                  {/* Navigation Arrows */}
+                  {vehicle.image_urls.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setSelectedImage(prev => prev === 0 ? vehicle.image_urls!.length - 1 : prev - 1)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background p-2 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <button
+                        onClick={() => setSelectedImage(prev => prev === vehicle.image_urls!.length - 1 ? 0 : prev + 1)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background p-2 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="w-6 h-6" />
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Image Counter */}
+                  {vehicle.image_urls.length > 1 && (
+                    <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                      {selectedImage + 1} / {vehicle.image_urls.length}
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-[500px] bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                   <DollarSign className="w-24 h-24 text-primary/40" />
@@ -177,20 +207,23 @@ const PublicVehicleDetails = () => {
               )}
             </div>
 
+            {/* Thumbnails */}
             {vehicle.image_urls && vehicle.image_urls.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="flex gap-2 overflow-x-auto pb-2">
                 {vehicle.image_urls.map((url, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${
-                      selectedImage === idx ? "border-primary ring-2 ring-primary/20" : "border-border"
+                    className={`relative flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${
+                      selectedImage === idx 
+                        ? "border-primary ring-2 ring-primary/30 scale-105" 
+                        : "border-border opacity-70 hover:opacity-100"
                     }`}
                   >
                     <img
                       src={url}
                       alt={`${vehicle.model} ${idx + 1}`}
-                      className="w-full h-20 object-cover"
+                      className="w-20 h-16 object-cover"
                     />
                   </button>
                 ))}
