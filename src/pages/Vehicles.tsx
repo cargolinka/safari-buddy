@@ -41,6 +41,7 @@ const Vehicles = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
   
   const [startLocation, setStartLocation] = useState(searchParams.get("startLocation") || "");
@@ -50,13 +51,31 @@ const Vehicles = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(
     searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined
   );
-  const [vehicleType, setVehicleType] = useState(searchParams.get("vehicleType") || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
   const [vehicleSubCategory, setVehicleSubCategory] = useState(searchParams.get("vehicleSubCategory") || "");
 
   useEffect(() => {
+    fetchCategories();
     fetchSubCategories();
+  }, []);
+
+  useEffect(() => {
     fetchVehicles();
-  }, [vehicleType, vehicleSubCategory, startDate, endDate]);
+  }, [selectedCategory, vehicleSubCategory, startDate, endDate, subCategories]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicle_categories")
+        .select("*")
+        .order("name");
+      
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error: any) {
+      console.error("Failed to load categories:", error.message);
+    }
+  };
 
   const fetchSubCategories = async () => {
     try {
@@ -72,6 +91,11 @@ const Vehicles = () => {
     }
   };
 
+  // Filter subcategories based on selected category
+  const filteredSubCategories = selectedCategory && selectedCategory !== "all"
+    ? subCategories.filter(sub => sub.category_id === selectedCategory)
+    : subCategories;
+
   const fetchVehicles = async () => {
     setLoading(true);
     try {
@@ -84,9 +108,14 @@ const Vehicles = () => {
         .eq("status", "available")
         .eq("is_compliant", true);
 
-      // Filter by vehicle type if selected
-      if (vehicleType && vehicleType !== "" && vehicleType !== "all") {
-        query = query.eq("type", vehicleType as any);
+      // Filter by category if selected (through subcategories)
+      if (selectedCategory && selectedCategory !== "" && selectedCategory !== "all") {
+        const categorySubIds = subCategories
+          .filter(sub => sub.category_id === selectedCategory)
+          .map(sub => sub.id);
+        if (categorySubIds.length > 0) {
+          query = query.in("subcategory_id", categorySubIds);
+        }
       }
 
       // Filter by vehicle subcategory if selected
@@ -124,11 +153,17 @@ const Vehicles = () => {
     if (startLocation) params.startLocation = startLocation;
     if (startDate) params.startDate = format(startDate, "yyyy-MM-dd");
     if (endDate) params.endDate = format(endDate, "yyyy-MM-dd");
-    if (vehicleType) params.vehicleType = vehicleType;
+    if (selectedCategory) params.category = selectedCategory;
     if (vehicleSubCategory) params.vehicleSubCategory = vehicleSubCategory;
     
     setSearchParams(params);
     fetchVehicles();
+  };
+
+  // Reset subcategory when category changes
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setVehicleSubCategory(""); // Reset subcategory when category changes
   };
 
   const formatVehicleType = (type: string) => {
@@ -226,16 +261,17 @@ const Vehicles = () => {
               </div>
 
               <div className="flex-1 min-w-[160px]">
-                <Select value={vehicleType} onValueChange={setVehicleType}>
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Vehicle Type" />
+                    <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="land_cruiser">Land Cruiser</SelectItem>
-                    <SelectItem value="tour_van">Tour Van</SelectItem>
-                    <SelectItem value="bus">Bus</SelectItem>
-                    <SelectItem value="saloon">Saloon</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -247,7 +283,7 @@ const Vehicles = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Sub Categories</SelectItem>
-                    {subCategories.map((subCat) => (
+                    {filteredSubCategories.map((subCat) => (
                       <SelectItem key={subCat.id} value={subCat.id}>
                         {subCat.name}
                       </SelectItem>
@@ -290,13 +326,12 @@ const Vehicles = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-2">No vehicles found</h2>
             <p className="text-muted-foreground mb-6">Try adjusting your search criteria</p>
             <Button onClick={() => {
-              setVehicleType("all");
-              setVehicleSubCategory("all");
+              setSelectedCategory("");
+              setVehicleSubCategory("");
               setStartDate(undefined);
               setEndDate(undefined);
               setStartLocation("");
               setSearchParams({});
-              fetchVehicles();
             }}>
               Clear Filters
             </Button>
