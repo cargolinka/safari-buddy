@@ -401,7 +401,7 @@ const Index = () => {
               <Card 
                 key={category.id}
                 className="group cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden border-0 shadow-lg"
-                onClick={() => navigate(`/vehicles?vehicleType=${category.id}`)}
+                onClick={() => navigate(`/vehicles?category=${category.id}`)}
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   {category.image_url ? (
