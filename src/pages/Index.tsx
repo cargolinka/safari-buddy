@@ -48,13 +48,35 @@ const Index = () => {
 
   const fetchCategories = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch categories
+      const { data: categoriesData, error: catError } = await supabase
         .from("vehicle_categories")
         .select("*")
         .order("name", { ascending: true });
 
-      if (error) throw error;
-      setCategories(data || []);
+      if (catError) throw catError;
+
+      // Fetch vehicle counts per category via subcategories
+      const { data: vehiclesData, error: vehError } = await supabase
+        .from("vehicles")
+        .select(`
+          id,
+          vehicle_subcategories!inner(category_id)
+        `)
+        .eq("status", "available")
+        .eq("is_compliant", true);
+
+      if (vehError) throw vehError;
+
+      // Merge counts into categories
+      const categoriesWithCounts = (categoriesData || []).map(cat => ({
+        ...cat,
+        vehicle_count: (vehiclesData || []).filter(v => 
+          v.vehicle_subcategories?.category_id === cat.id
+        ).length
+      }));
+
+      setCategories(categoriesWithCounts);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -138,12 +160,6 @@ const Index = () => {
     }
   };
 
-  const vehicleCategories = [
-    { name: "SUVs & Land Cruisers", icon: Car, count: 45, image: heroImage1 },
-    { name: "Tour Vans", icon: Car, count: 28, image: heroImage2 },
-    { name: "Buses & Minibuses", icon: Bus, count: 32, image: heroImage3 },
-    { name: "Sedan & Saloon", icon: Car, count: 19, image: heroImage1 },
-  ];
 
   const blogPosts = [
     {
@@ -380,28 +396,46 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {vehicleCategories.map((category, index) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {categories.map((category) => (
               <Card 
-                key={index}
-                className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden"
-                onClick={() => navigate("/vehicles")}
+                key={category.id}
+                className="group cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden border-0 shadow-lg"
+                onClick={() => navigate(`/vehicles?vehicleType=${category.id}`)}
               >
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={category.image} 
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                  <category.icon className="absolute bottom-4 right-4 h-8 w-8 text-white opacity-80" />
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  {category.image_url ? (
+                    <img 
+                      src={category.image_url} 
+                      alt={category.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                      <Car className="h-16 w-16 text-muted-foreground/50" />
+                    </div>
+                  )}
+                  
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  
+                  {/* Vehicle count badge - top right */}
+                  <Badge className="absolute top-3 right-3 bg-accent/90 backdrop-blur-sm text-accent-foreground font-semibold shadow-lg">
+                    {category.vehicle_count || 0} {category.vehicle_count === 1 ? 'Vehicle' : 'Vehicles'}
+                  </Badge>
+                  
+                  {/* Category name - bottom left */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {category.name}
+                    </h3>
+                    {category.description && (
+                      <p className="text-sm text-white/80 line-clamp-2">
+                        {category.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-xl">{category.name}</CardTitle>
-                  <CardDescription className="text-base">
-                    {category.count} vehicles available
-                  </CardDescription>
-                </CardHeader>
               </Card>
             ))}
           </div>
