@@ -5,14 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar as CalendarIcon, MapPin, Users, DollarSign, Car } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { Users, Car } from "lucide-react";
 import { toast } from "sonner";
 import vehiclesHero from "@/assets/vehicles-hero.jpg";
 
@@ -44,13 +39,6 @@ const Vehicles = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
   
-  const [startLocation, setStartLocation] = useState(searchParams.get("startLocation") || "");
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined
-  );
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined
-  );
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
   const [vehicleSubCategory, setVehicleSubCategory] = useState(searchParams.get("vehicleSubCategory") || "");
 
@@ -61,7 +49,7 @@ const Vehicles = () => {
 
   useEffect(() => {
     fetchVehicles();
-  }, [selectedCategory, vehicleSubCategory, startDate, endDate, subCategories]);
+  }, [selectedCategory, vehicleSubCategory, subCategories]);
 
   const fetchCategories = async () => {
     try {
@@ -123,19 +111,6 @@ const Vehicles = () => {
         query = query.eq("subcategory_id", vehicleSubCategory);
       }
 
-      // If dates are selected, filter out vehicles that are already booked
-      if (startDate && endDate) {
-        const { data: bookedVehicles } = await supabase
-          .from("bookings")
-          .select("vehicle_id")
-          .or(`and(pickup_date.lte.${format(endDate, "yyyy-MM-dd")},dropoff_date.gte.${format(startDate, "yyyy-MM-dd")})`)
-          .in("status", ["confirmed", "in_progress"]);
-
-        if (bookedVehicles && bookedVehicles.length > 0) {
-          const bookedIds = bookedVehicles.map(b => b.vehicle_id);
-          query = query.not("id", "in", `(${bookedIds.join(",")})`);
-        }
-      }
 
       const { data, error } = await query.order("created_at", { ascending: false });
 
@@ -148,27 +123,9 @@ const Vehicles = () => {
     }
   };
 
-  const handleSearch = () => {
-    const params: any = {};
-    if (startLocation) params.startLocation = startLocation;
-    if (startDate) params.startDate = format(startDate, "yyyy-MM-dd");
-    if (endDate) params.endDate = format(endDate, "yyyy-MM-dd");
-    if (selectedCategory) params.category = selectedCategory;
-    if (vehicleSubCategory) params.vehicleSubCategory = vehicleSubCategory;
-    
-    setSearchParams(params);
-    fetchVehicles();
-  };
+  // Get selected category name for title
+  const selectedCategoryName = categories.find(cat => cat.id === selectedCategory)?.name || "All Vehicles";
 
-  // Reset subcategory when category changes
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    setVehicleSubCategory(""); // Reset subcategory when category changes
-  };
-
-  const formatVehicleType = (type: string) => {
-    return type.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -189,97 +146,17 @@ const Vehicles = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Category Title & Subcategory Filter */}
       <div className="bg-primary/10 border-b border-border">
         <div className="container mx-auto px-4 py-6">
-          <Card className="p-4 shadow-lg bg-card">
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Start Location"
-                    value={startLocation}
-                    onChange={(e) => setStartLocation(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="flex-1 min-w-[180px]">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PP") : "Start Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                      disabled={(date) => date < new Date()}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex-1 min-w-[180px]">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PP") : "End Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      initialFocus
-                      disabled={(date) => date < (startDate || new Date())}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex-1 min-w-[160px]">
-                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex-1 min-w-[160px]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold text-foreground">{selectedCategoryName}</h2>
+            
+            {filteredSubCategories.length > 0 && (
+              <div className="w-full sm:w-auto min-w-[200px]">
                 <Select value={vehicleSubCategory} onValueChange={setVehicleSubCategory}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sub Category" />
+                    <SelectValue placeholder="Filter by Sub Category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Sub Categories</SelectItem>
@@ -291,14 +168,8 @@ const Vehicles = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="flex-shrink-0">
-                <Button onClick={handleSearch} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
-                  Search
-                </Button>
-              </div>
-            </div>
-          </Card>
+            )}
+          </div>
         </div>
       </div>
 
@@ -328,9 +199,6 @@ const Vehicles = () => {
             <Button onClick={() => {
               setSelectedCategory("");
               setVehicleSubCategory("");
-              setStartDate(undefined);
-              setEndDate(undefined);
-              setStartLocation("");
               setSearchParams({});
             }}>
               Clear Filters
