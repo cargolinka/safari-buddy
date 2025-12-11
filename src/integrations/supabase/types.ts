@@ -875,6 +875,7 @@ export type Database = {
           inspection_expiry: string
           insurance_expiry: string
           is_compliant: boolean | null
+          min_advance_booking_days: number
           model: string
           owner_id: string
           registration_number: string | null
@@ -897,6 +898,7 @@ export type Database = {
           inspection_expiry: string
           insurance_expiry: string
           is_compliant?: boolean | null
+          min_advance_booking_days?: number
           model: string
           owner_id: string
           registration_number?: string | null
@@ -919,6 +921,7 @@ export type Database = {
           inspection_expiry?: string
           insurance_expiry?: string
           is_compliant?: boolean | null
+          min_advance_booking_days?: number
           model?: string
           owner_id?: string
           registration_number?: string | null
