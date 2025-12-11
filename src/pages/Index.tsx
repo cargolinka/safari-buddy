@@ -121,7 +121,10 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from("vehicles")
-        .select("*")
+        .select(`
+          *,
+          vehicle_subcategories(name, vehicle_categories(name))
+        `)
         .eq("status", "available")
         .eq("is_compliant", true)
         .limit(8);
@@ -432,47 +435,68 @@ const Index = () => {
               {featuredVehicles.map((vehicle) => (
                 <Card 
                   key={vehicle.id}
-                  className="group hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-                  onClick={() => navigate("/vehicles")}
+                  className="group hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border-0 shadow-md"
+                  onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                 >
-                  <div className="relative h-48 overflow-hidden bg-muted">
+                  <div className="relative h-52 overflow-hidden bg-muted">
                     {(vehicle.image_urls?.[0] || vehicle.image_url) ? (
                       <img 
                         src={vehicle.image_urls?.[0] || vehicle.image_url} 
                         alt={vehicle.model}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Car className="h-16 w-16 text-muted-foreground" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                        <Car className="h-20 w-20 text-muted-foreground/50" />
                       </div>
                     )}
-                    <Badge className="absolute top-3 right-3 bg-green-600">
+                    {/* Gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* Category badge - top left */}
+                    {vehicle.vehicle_subcategories?.vehicle_categories?.name && (
+                      <Badge className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-primary-foreground font-medium shadow-lg">
+                        {vehicle.vehicle_subcategories.vehicle_categories.name}
+                      </Badge>
+                    )}
+                    
+                    {/* Available badge - top right */}
+                    <Badge className="absolute top-3 right-3 bg-green-600/90 backdrop-blur-sm text-white shadow-lg">
                       Available
                     </Badge>
+                    
+                    {/* Subcategory badge - bottom left */}
+                    {vehicle.vehicle_subcategories?.name && (
+                      <Badge variant="outline" className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-foreground border-0 shadow-lg font-medium">
+                        {vehicle.vehicle_subcategories.name}
+                      </Badge>
+                    )}
+                    
+                    {/* Price badge - bottom right */}
+                    <div className="absolute bottom-3 right-3 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
+                      <span className="text-lg font-bold text-primary">
+                        KES {Number(vehicle.daily_rate).toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/day</span>
+                    </div>
                   </div>
-                  <CardHeader>
-                    <Badge variant="secondary" className="w-fit mb-2 capitalize">
-                      {vehicle.type}
-                    </Badge>
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                  
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-1">
                       {vehicle.model}
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CardDescription className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
-                        <span>{vehicle.capacity} seats</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-3 border-t">
-                        <span className="text-sm text-muted-foreground">Daily Rate</span>
-                        <span className="text-xl font-bold text-primary">
-                          KES {Number(vehicle.daily_rate).toLocaleString()}
+                        {vehicle.capacity} seats
+                      </span>
+                      {vehicle.registration_number && (
+                        <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">
+                          {vehicle.registration_number}
                         </span>
-                      </div>
-                    </div>
-                  </CardContent>
+                      )}
+                    </CardDescription>
+                  </CardHeader>
                 </Card>
               ))}
             </div>
