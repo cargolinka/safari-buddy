@@ -20,6 +20,7 @@ const vehicleSchema = z.object({
   year: z.number().min(1900).max(new Date().getFullYear() + 1),
   capacity: z.number().min(1).max(100),
   daily_rate: z.number().min(0),
+  min_advance_booking_days: z.number().min(0).max(30),
   insurance_expiry: z.string(),
   inspection_expiry: z.string(),
   road_license_expiry: z.string(),
@@ -66,6 +67,7 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
       year: initialData?.year || new Date().getFullYear(),
       capacity: initialData?.capacity || 5,
       daily_rate: initialData?.daily_rate || 0,
+      min_advance_booking_days: initialData?.min_advance_booking_days || 0,
       insurance_expiry: initialData?.insurance_expiry || "",
       inspection_expiry: initialData?.inspection_expiry || "",
       road_license_expiry: initialData?.road_license_expiry || "",
@@ -407,18 +409,44 @@ export default function VehicleForm({ initialData, onSubmit, loading }: VehicleF
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select onValueChange={(value: any) => setValue("status", value)} defaultValue={watch("status")}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="available">Available</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="unavailable">Unavailable</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="min_advance_booking_days">Minimum Advance Booking Days</Label>
+              <Select 
+                onValueChange={(value) => setValue("min_advance_booking_days", parseInt(value))} 
+                defaultValue={String(watch("min_advance_booking_days") || 0)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select days" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Real-time (same day)</SelectItem>
+                  <SelectItem value="1">1 day in advance</SelectItem>
+                  <SelectItem value="2">2 days in advance</SelectItem>
+                  <SelectItem value="3">3 days in advance</SelectItem>
+                  <SelectItem value="5">5 days in advance</SelectItem>
+                  <SelectItem value="7">7 days (1 week)</SelectItem>
+                  <SelectItem value="14">14 days (2 weeks)</SelectItem>
+                  <SelectItem value="30">30 days (1 month)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">How far in advance clients must book</p>
+              {errors.min_advance_booking_days && <p className="text-sm text-destructive mt-1">{errors.min_advance_booking_days.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select onValueChange={(value: any) => setValue("status", value)} defaultValue={watch("status")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

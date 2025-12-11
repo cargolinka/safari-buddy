@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
-import { ArrowLeft, MapPin, Users, DollarSign, CheckCircle2 } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { ArrowLeft, MapPin, Users, DollarSign, CheckCircle2, Clock } from "lucide-react";
+import { format, addMonths, addDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
 interface Vehicle {
@@ -25,6 +25,7 @@ interface Vehicle {
   insurance_expiry: string;
   inspection_expiry: string;
   road_license_expiry: string;
+  min_advance_booking_days: number;
 }
 
 interface Booking {
@@ -85,6 +86,22 @@ const PublicVehicleDetails = () => {
       const dropoff = new Date(booking.dropoff_date);
       return date >= pickup && date <= dropoff;
     });
+  };
+
+  const isDateTooSoon = (date: Date) => {
+    if (!vehicle) return false;
+    const minDays = vehicle.min_advance_booking_days || 0;
+    const earliestBookableDate = addDays(startOfDay(new Date()), minDays);
+    return startOfDay(date) < earliestBookableDate;
+  };
+
+  const getAdvanceBookingLabel = (days: number) => {
+    if (days === 0) return "Same-day booking available";
+    if (days === 1) return "Book at least 1 day in advance";
+    if (days === 7) return "Book at least 1 week in advance";
+    if (days === 14) return "Book at least 2 weeks in advance";
+    if (days === 30) return "Book at least 1 month in advance";
+    return `Book at least ${days} days in advance`;
   };
 
   const formatVehicleType = (type: string) => {
@@ -267,6 +284,13 @@ const PublicVehicleDetails = () => {
                     <span className="font-medium">{formatVehicleType(vehicle.type)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 border-b">
+                    <span className="text-muted-foreground">Advance Booking</span>
+                    <span className="font-medium flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      {getAdvanceBookingLabel(vehicle.min_advance_booking_days || 0)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b">
                     <span className="text-muted-foreground">Status</span>
                     <Badge variant="secondary">{vehicle.status}</Badge>
                   </div>
@@ -281,7 +305,7 @@ const PublicVehicleDetails = () => {
         <Card className="mt-8">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Availability Calendar</h3>
-            <div className="flex gap-4 mb-4 text-sm">
+            <div className="flex flex-wrap gap-4 mb-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
                 <span>Available</span>
@@ -290,30 +314,40 @@ const PublicVehicleDetails = () => {
                 <div className="w-4 h-4 bg-red-500 rounded"></div>
                 <span>Booked</span>
               </div>
+              {vehicle.min_advance_booking_days > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-muted rounded"></div>
+                  <span>Too soon (requires {vehicle.min_advance_booking_days}+ days advance)</span>
+                </div>
+              )}
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <Calendar
                 mode="single"
                 modifiers={{
-                  booked: (date) => isDateBooked(date)
+                  booked: (date) => isDateBooked(date),
+                  tooSoon: (date) => isDateTooSoon(date) && !isDateBooked(date)
                 }}
                 modifiersStyles={{
-                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
+                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" },
+                  tooSoon: { backgroundColor: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                 }}
-                disabled={(date) => date < new Date()}
-                className="rounded-md border"
+                disabled={(date) => isDateTooSoon(date) || isDateBooked(date)}
+                className="rounded-md border pointer-events-auto"
               />
               <Calendar
                 mode="single"
                 month={addMonths(new Date(), 1)}
                 modifiers={{
-                  booked: (date) => isDateBooked(date)
+                  booked: (date) => isDateBooked(date),
+                  tooSoon: (date) => isDateTooSoon(date) && !isDateBooked(date)
                 }}
                 modifiersStyles={{
-                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" }
+                  booked: { backgroundColor: "hsl(var(--destructive))", color: "white" },
+                  tooSoon: { backgroundColor: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                 }}
-                disabled={(date) => date < new Date()}
-                className="rounded-md border"
+                disabled={(date) => isDateTooSoon(date) || isDateBooked(date)}
+                className="rounded-md border pointer-events-auto"
               />
             </div>
           </CardContent>
