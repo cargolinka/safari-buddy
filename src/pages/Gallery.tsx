@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
+import heroImage from "@/assets/hero-safari-3.jpg";
 
 const Gallery = () => {
   // Placeholder images - in production these would come from a database
@@ -14,10 +15,16 @@ const Gallery = () => {
       <Header />
       
       <main className="flex-1">
-        <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Gallery</h1>
-            <p className="text-xl text-center text-muted-foreground max-w-3xl mx-auto">
+        {/* Hero Section */}
+        <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+          <div className="relative z-10 container text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Gallery</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Explore our collection of safari vehicles and memorable adventures
             </p>
           </div>
