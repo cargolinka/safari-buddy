@@ -67,7 +67,7 @@ const FeaturedPost = ({
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{title}</h1>
           <p className="text-lg text-muted-foreground mb-6 line-clamp-2">{excerpt}</p>
           <Button size="lg" asChild>
-            <Link to={`/blog/${slug}`}>Read Full Article</Link>
+            <Link to={`/safari-hire-blog/${slug}`}>Read Full Article</Link>
           </Button>
         </div>
       </div>
