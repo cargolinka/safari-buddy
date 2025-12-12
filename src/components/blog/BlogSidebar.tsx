@@ -45,7 +45,7 @@ const BlogSidebar = ({ categories, recentPosts, archive, popularTags }: BlogSide
           {categories.map((category) => (
             <Link
               key={category.id}
-              to={`/blog?category=${category.slug}`}
+              to={`/safari-hire-blog?category=${category.slug}`}
               className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-accent transition-colors"
             >
               <span className="text-sm">{category.name}</span>
@@ -66,7 +66,7 @@ const BlogSidebar = ({ categories, recentPosts, archive, popularTags }: BlogSide
           {archive.map((item, index) => (
             <Link
               key={index}
-              to={`/blog?archive=${item.year}-${item.month.padStart(2, '0')}`}
+              to={`/safari-hire-blog?archive=${item.year}-${item.month.padStart(2, '0')}`}
               className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-accent transition-colors text-sm"
             >
               <span>
@@ -89,7 +89,7 @@ const BlogSidebar = ({ categories, recentPosts, archive, popularTags }: BlogSide
           {recentPosts.map((post) => (
             <Link
               key={post.id}
-              to={`/blog/${post.slug}`}
+              to={`/safari-hire-blog/${post.slug}`}
               className="flex gap-3 group"
             >
               {post.featured_image_url && (
@@ -129,7 +129,7 @@ const BlogSidebar = ({ categories, recentPosts, archive, popularTags }: BlogSide
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {popularTags.map((tag) => (
-                <Link key={tag} to={`/blog?tag=${tag}`}>
+                <Link key={tag} to={`/safari-hire-blog?tag=${tag}`}>
                   <Badge variant="outline" className="hover:bg-accent cursor-pointer">
                     {tag}
                   </Badge>

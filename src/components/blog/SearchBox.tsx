@@ -11,7 +11,7 @@ const SearchBox = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/blog?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/safari-hire-blog?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
