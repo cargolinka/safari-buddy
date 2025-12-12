@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Car } from "lucide-react";
+import { Users, Car, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import vehiclesHero from "@/assets/vehicles-hero.jpg";
 
@@ -41,6 +41,7 @@ const Vehicles = () => {
   
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
   const [vehicleSubCategory, setVehicleSubCategory] = useState(searchParams.get("vehicleSubCategory") || "");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     fetchCategories();
@@ -49,7 +50,7 @@ const Vehicles = () => {
 
   useEffect(() => {
     fetchVehicles();
-  }, [selectedCategory, vehicleSubCategory, subCategories]);
+  }, [selectedCategory, vehicleSubCategory, subCategories, sortBy]);
 
   const fetchCategories = async () => {
     try {
@@ -111,8 +112,16 @@ const Vehicles = () => {
         query = query.eq("subcategory_id", vehicleSubCategory);
       }
 
+      // Apply sorting
+      if (sortBy === "price_low") {
+        query = query.order("daily_rate", { ascending: true });
+      } else if (sortBy === "price_high") {
+        query = query.order("daily_rate", { ascending: false });
+      } else {
+        query = query.order("created_at", { ascending: false });
+      }
 
-      const { data, error } = await query.order("created_at", { ascending: false });
+      const { data, error } = await query;
 
       if (error) throw error;
       setVehicles(data || []);
@@ -194,6 +203,21 @@ const Vehicles = () => {
                   </Select>
                 </div>
               )}
+
+              {/* Sort By */}
+              <div className="w-full sm:w-auto min-w-[180px]">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger>
+                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="price_low">Price: Low to High</SelectItem>
+                    <SelectItem value="price_high">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
