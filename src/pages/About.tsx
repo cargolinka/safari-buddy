@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
+import heroImage from "@/assets/hero-safari.jpg";
 
 const About = () => {
   return (
@@ -7,10 +8,16 @@ const About = () => {
       <Header />
       
       <main className="flex-1">
-        <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">About SafariHire</h1>
-            <p className="text-xl text-center text-muted-foreground max-w-3xl mx-auto">
+        {/* Hero Section */}
+        <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+          <div className="relative z-10 container text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">About SafariHire</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Your trusted partner for safari vehicle rentals across East Africa
             </p>
           </div>

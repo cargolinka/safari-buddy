@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Clock, Award, Users, Wrench, MapPin } from "lucide-react";
+import heroImage from "@/assets/hero-safari-2.jpg";
 
 const WhyUs = () => {
   const features = [
@@ -41,10 +42,16 @@ const WhyUs = () => {
       <Header />
       
       <main className="flex-1">
-        <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Why Choose SafariHire?</h1>
-            <p className="text-xl text-center text-muted-foreground max-w-3xl mx-auto">
+        {/* Hero Section */}
+        <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+          <div className="relative z-10 container text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Why Choose SafariHire?</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Experience the difference of working with East Africa's most trusted safari vehicle rental platform
             </p>
           </div>

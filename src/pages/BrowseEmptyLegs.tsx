@@ -9,6 +9,7 @@ import { Calendar, MapPin, DollarSign, Users, Clock, Search } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import heroImage from "@/assets/hero-safari-3.jpg";
 
 interface EmptyLeg {
   id: string;
@@ -104,13 +105,22 @@ const BrowseEmptyLegs = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Browse Empty Legs</h1>
-          <p className="text-muted-foreground text-lg">
+      {/* Hero Section */}
+      <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+        <div className="relative z-10 container text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Browse Empty Legs</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Save up to 50% on empty return journeys
           </p>
         </div>
+      </section>
+
+      <main className="container mx-auto px-4 py-8">
 
         {/* Search Filters */}
         <Card className="mb-8">
