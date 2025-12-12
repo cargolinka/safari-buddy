@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -105,15 +106,52 @@ const BlogPost = () => {
         <main className="flex-1 container py-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Blog post not found</h1>
           <Button asChild>
-            <Link to="/blog">Back to Blog</Link>
+            <Link to="/safari-hire-blog">Back to Blog</Link>
           </Button>
         </main>
       </div>
     );
   }
 
+  const siteUrl = "https://safari-buddy.lovable.app";
+  const postUrl = `${siteUrl}/safari-hire-blog/${post.slug}`;
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{post.meta_title || post.title} | Safari Buddy Blog</title>
+        <meta name="description" content={post.meta_description || post.excerpt} />
+        {post.meta_keywords && post.meta_keywords.length > 0 && (
+          <meta name="keywords" content={post.meta_keywords.join(", ")} />
+        )}
+        {post.canonical_url && <link rel="canonical" href={post.canonical_url} />}
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post.meta_title || post.title} />
+        <meta property="og:description" content={post.meta_description || post.excerpt} />
+        <meta property="og:url" content={postUrl} />
+        {(post.og_image_url || post.featured_image_url) && (
+          <meta property="og:image" content={post.og_image_url || post.featured_image_url} />
+        )}
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.meta_title || post.title} />
+        <meta name="twitter:description" content={post.meta_description || post.excerpt} />
+        {(post.og_image_url || post.featured_image_url) && (
+          <meta name="twitter:image" content={post.og_image_url || post.featured_image_url} />
+        )}
+        
+        {/* Article specific */}
+        <meta property="article:published_time" content={post.published_at} />
+        {post.author?.full_name && <meta property="article:author" content={post.author.full_name} />}
+        {post.category?.name && <meta property="article:section" content={post.category.name} />}
+        {post.tags?.map((tag: string) => (
+          <meta key={tag} property="article:tag" content={tag} />
+        ))}
+      </Helmet>
+      
       <Header />
       
       <main className="flex-1">
@@ -129,7 +167,7 @@ const BlogPost = () => {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/blog">Blog</Link>
+                    <Link to="/safari-hire-blog">Blog</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
@@ -153,7 +191,7 @@ const BlogPost = () => {
           <div className="container py-12">
             <div className="max-w-4xl mx-auto">
               <Button variant="ghost" asChild className="mb-6">
-                <Link to="/blog">
+                <Link to="/safari-hire-blog">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Blog
                 </Link>
@@ -198,7 +236,7 @@ const BlogPost = () => {
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t">
                   {post.tags.map((tag: string) => (
-                    <Link key={tag} to={`/blog?tag=${tag}`}>
+                    <Link key={tag} to={`/safari-hire-blog?tag=${tag}`}>
                       <Badge variant="outline">{tag}</Badge>
                     </Link>
                   ))}

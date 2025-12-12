@@ -56,7 +56,7 @@ const BlogCard = ({
           </div>
         </div>
         <h2 className="text-2xl font-semibold hover:text-primary transition-colors">
-          <Link to={`/blog/${slug}`}>{title}</Link>
+          <Link to={`/safari-hire-blog/${slug}`}>{title}</Link>
         </h2>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -73,7 +73,7 @@ const BlogCard = ({
             </div>
           </div>
           <Button variant="outline" asChild>
-            <Link to={`/blog/${slug}`}>Read More</Link>
+            <Link to={`/safari-hire-blog/${slug}`}>Read More</Link>
           </Button>
         </div>
       </CardContent>
