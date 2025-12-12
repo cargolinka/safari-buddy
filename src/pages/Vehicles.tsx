@@ -146,29 +146,55 @@ const Vehicles = () => {
         </div>
       </div>
 
-      {/* Category Title & Subcategory Filter */}
+      {/* Category & Subcategory Filters */}
       <div className="bg-primary/10 border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-foreground">{selectedCategoryName}</h2>
             
-            {filteredSubCategories.length > 0 && (
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              {/* Category Filter */}
               <div className="w-full sm:w-auto min-w-[200px]">
-                <Select value={vehicleSubCategory} onValueChange={setVehicleSubCategory}>
+                <Select 
+                  value={selectedCategory} 
+                  onValueChange={(value) => {
+                    setSelectedCategory(value);
+                    setVehicleSubCategory(""); // Reset subcategory when category changes
+                  }}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Filter by Sub Category" />
+                    <SelectValue placeholder="Filter by Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sub Categories</SelectItem>
-                    {filteredSubCategories.map((subCat) => (
-                      <SelectItem key={subCat.id} value={subCat.id}>
-                        {subCat.name}
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
+
+              {/* Subcategory Filter */}
+              {filteredSubCategories.length > 0 && (
+                <div className="w-full sm:w-auto min-w-[200px]">
+                  <Select value={vehicleSubCategory} onValueChange={setVehicleSubCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by Sub Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sub Categories</SelectItem>
+                      {filteredSubCategories.map((subCat) => (
+                        <SelectItem key={subCat.id} value={subCat.id}>
+                          {subCat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -293,7 +319,7 @@ const Vehicles = () => {
                     )}
                     
                     <Button asChild className="w-full">
-                      <Link to={`/vehicles/${vehicle.id}`}>
+                      <Link to={`/safari-vehicles/${vehicle.id}`}>
                         View Details
                       </Link>
                     </Button>

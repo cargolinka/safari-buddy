@@ -115,7 +115,7 @@ const Index = () => {
           description: "Explore the wild with our top-quality safari vehicles. Professional drivers and well-maintained fleet for your unforgettable journey.",
           image_url: heroImage1,
           button_text: "Browse Vehicles",
-          button_link: "/vehicles",
+          button_link: "/safari-vehicles",
           secondary_button_text: "Learn More",
           secondary_button_link: "/about",
         }]);
@@ -132,7 +132,7 @@ const Index = () => {
         description: "Explore the wild with our top-quality safari vehicles.",
         image_url: heroImage1,
         button_text: "Browse Vehicles",
-        button_link: "/vehicles",
+        button_link: "/safari-vehicles",
         secondary_button_text: "Learn More",
         secondary_button_link: "/about",
       }]);
@@ -201,7 +201,7 @@ const Index = () => {
     if (vehicleSubCategory) params.set("vehicleSubCategory", vehicleSubCategory);
     if (startLocation) params.set("startLocation", startLocation);
     
-    navigate(`/vehicles?${params.toString()}`);
+    navigate(`/safari-vehicles?${params.toString()}`);
   };
 
   return (
@@ -411,7 +411,7 @@ const Index = () => {
               <Card 
                 key={category.id}
                 className="group cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden border-0 shadow-lg"
-                onClick={() => navigate(`/vehicles?category=${category.id}`)}
+                onClick={() => navigate(`/safari-vehicles?category=${category.id}`)}
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   {category.image_url ? (
@@ -465,7 +465,7 @@ const Index = () => {
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link to="/vehicles">
+              <Link to="/safari-vehicles">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -480,7 +480,7 @@ const Index = () => {
                 <Card 
                   key={vehicle.id}
                   className="group hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border-0 shadow-md"
-                  onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+                  onClick={() => navigate(`/safari-vehicles/${vehicle.id}`)}
                 >
                   <div className="relative h-52 overflow-hidden bg-muted">
                     {(vehicle.image_urls?.[0] || vehicle.image_url) ? (
@@ -796,7 +796,7 @@ const Index = () => {
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/vehicles" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/safari-vehicles" className="text-muted-foreground hover:text-primary transition-colors">
                     Browse Vehicles
                   </Link>
                 </li>
