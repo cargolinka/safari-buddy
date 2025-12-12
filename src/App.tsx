@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import ManageGallery from "./pages/admin/ManageGallery";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -70,7 +71,7 @@ const App = () => (
           <Route path="/empty-legs" element={<BrowseEmptyLegs />} />
           <Route path="/about" element={<About />} />
           <Route path="/why-us" element={<WhyUs />} />
-          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/safari-hire-gallery" element={<Gallery />} />
           <Route path="/safari-hire-blog" element={<Blog />} />
           <Route path="/safari-hire-blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="categories" element={<ManageCategories />} />
               <Route path="subcategories" element={<ManageSubcategories />} />
               <Route path="hero-slider" element={<ManageHeroSlider />} />
+              <Route path="gallery" element={<ManageGallery />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="compliance" element={<ComplianceMonitoring />} />
               <Route path="test-data" element={<CreateTestData />} />

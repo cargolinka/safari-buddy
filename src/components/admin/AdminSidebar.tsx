@@ -1,4 +1,4 @@
-import { Users, Car, Building2, FolderTree, TrendingUp, Shield, ClipboardCheck, Image, FileCheck, Layers, FileText, Tags } from "lucide-react";
+import { Users, Car, Building2, FolderTree, TrendingUp, Shield, ClipboardCheck, Image, FileCheck, Layers, FileText, Tags, Images } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ const adminMenuItems = [
   { title: "Vehicle Categories", url: "/admin/categories", icon: FolderTree },
   { title: "Vehicle Subcategories", url: "/admin/subcategories", icon: Layers },
   { title: "Hero Slider", url: "/admin/hero-slider", icon: Image },
+  { title: "Gallery", url: "/admin/gallery", icon: Images },
   { title: "Blog Posts", url: "/admin/blog", icon: FileText },
   { title: "Blog Categories", url: "/admin/blog-categories", icon: Tags },
   { title: "Analytics", url: "/admin/analytics", icon: TrendingUp },

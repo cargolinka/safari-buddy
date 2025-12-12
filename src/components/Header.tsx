@@ -41,7 +41,7 @@ const Header = () => {
     { to: "/empty-legs", label: "Empty Legs" },
     { to: "/about", label: "About" },
     { to: "/why-us", label: "Why Us" },
-    { to: "/gallery", label: "Gallery" },
+    { to: "/safari-hire-gallery", label: "Gallery" },
     { to: "/safari-hire-blog", label: "Blog" },
     { to: "/contact", label: "Contact Us" },
   ];
