@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-safari-2.jpg";
+import BlogSidebar from "@/components/blog/BlogSidebar";
 import {
   Pagination,
   PaginationContent,
@@ -20,7 +21,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const POSTS_PER_PAGE = 9;
+const POSTS_PER_PAGE = 6;
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -153,6 +154,73 @@ const Blog = () => {
     },
   });
 
+  // Get recent posts for sidebar
+  const { data: recentPosts } = useQuery({
+    queryKey: ["recent-blog-posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, slug, featured_image_url, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Get archive months for sidebar
+  const { data: archiveData } = useQuery({
+    queryKey: ["blog-archive"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+      if (error) throw error;
+
+      // Group by month/year
+      const months: { [key: string]: number } = {};
+      data?.forEach((post) => {
+        if (post.published_at) {
+          const date = new Date(post.published_at);
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          months[key] = (months[key] || 0) + 1;
+        }
+      });
+
+      return Object.entries(months).map(([key, count]) => {
+        const [year, month] = key.split("-");
+        return { year, month, count };
+      });
+    },
+  });
+
+  // Get popular tags for sidebar
+  const { data: popularTags } = useQuery({
+    queryKey: ["popular-tags"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("tags")
+        .eq("is_published", true);
+      if (error) throw error;
+
+      const tagCounts: { [key: string]: number } = {};
+      data?.forEach((post) => {
+        post.tags?.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+
+      return Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([tag]) => tag);
+    },
+  });
+
   const handleCategoryFilter = (slug: string | null) => {
     if (slug) {
       setSearchParams({ category: slug });
@@ -253,77 +321,97 @@ const Blog = () => {
           </div>
         </section>
 
-        {/* Blog Grid */}
+        {/* Blog Grid with Sidebar */}
         <section className="container py-12">
-          {postsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-[380px] rounded-lg" />
-              ))}
-            </div>
-          ) : posts && posts.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {posts.map((post) => (
-                  <BlogCard
-                    key={post.id}
-                    id={post.id}
-                    title={post.title}
-                    slug={post.slug}
-                    excerpt={post.excerpt}
-                    featuredImage={post.featured_image_url}
-                    category={post.category}
-                    author={post.author}
-                    publishedAt={post.published_at}
-                    readingTime={post.reading_time}
-                    compact
-                  />
-                ))}
-              </div>
-              {totalPages > 1 && (
-                <Pagination className="mt-12">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content - 2 columns on large screens */}
+            <div className="lg:col-span-2">
+              {postsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-[380px] rounded-lg" />
+                  ))}
+                </div>
+              ) : posts && posts.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {posts.map((post) => (
+                      <BlogCard
+                        key={post.id}
+                        id={post.id}
+                        title={post.title}
+                        slug={post.slug}
+                        excerpt={post.excerpt}
+                        featuredImage={post.featured_image_url}
+                        category={post.category}
+                        author={post.author}
+                        publishedAt={post.published_at}
+                        readingTime={post.reading_time}
+                        compact
                       />
-                    </PaginationItem>
-                    {getPageNumbers().map((pageNum, idx) => (
-                      <PaginationItem key={idx}>
-                        {pageNum === "ellipsis" ? (
-                          <PaginationEllipsis />
-                        ) : (
-                          <PaginationLink
-                            onClick={() => setPage(pageNum)}
-                            isActive={page === pageNum}
-                            className="cursor-pointer"
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        )}
-                      </PaginationItem>
                     ))}
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">No blog posts found.</p>
-              {activeFilter && (
-                <Button variant="outline" onClick={clearFilters} className="mt-4">
-                  Clear Filters
-                </Button>
+                  </div>
+                  {totalPages > 1 && (
+                    <Pagination className="mt-12">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setPage(Math.max(1, page - 1))}
+                            className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                        {getPageNumbers().map((pageNum, idx) => (
+                          <PaginationItem key={idx}>
+                            {pageNum === "ellipsis" ? (
+                              <PaginationEllipsis />
+                            ) : (
+                              <PaginationLink
+                                onClick={() => setPage(pageNum)}
+                                isActive={page === pageNum}
+                                className="cursor-pointer"
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            )}
+                          </PaginationItem>
+                        ))}
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setPage(Math.min(totalPages, page + 1))}
+                            className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground text-lg">No blog posts found.</p>
+                  {activeFilter && (
+                    <Button variant="outline" onClick={clearFilters} className="mt-4">
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
-          )}
+
+            {/* Right Sidebar */}
+            <div className="lg:col-span-1">
+              <BlogSidebar
+                categories={categories?.map(cat => ({
+                  id: cat.id,
+                  name: cat.name,
+                  slug: cat.slug,
+                  post_count: cat.post_count || 0
+                })) || []}
+                recentPosts={recentPosts || []}
+                archive={archiveData || []}
+                popularTags={popularTags || []}
+              />
+            </div>
+          </div>
         </section>
       </main>
     </div>
