@@ -9,6 +9,7 @@ import { Calendar, MapPin, DollarSign, Users, Clock, Search } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-safari-3.jpg";
 
 interface EmptyLeg {
@@ -266,6 +267,8 @@ const BrowseEmptyLegs = () => {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 };

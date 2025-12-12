@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -386,6 +387,8 @@ const PublicVehicleDetails = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Footer />
     </div>
   );
 };

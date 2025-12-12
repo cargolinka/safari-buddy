@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Clock, Award, Users, Wrench, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-safari-2.jpg";
@@ -78,6 +79,8 @@ const WhyUs = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 };

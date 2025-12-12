@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import BlogCard from "@/components/blog/BlogCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -414,6 +415,8 @@ const Blog = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 };
