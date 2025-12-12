@@ -3,17 +3,20 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import BlogCard from "@/components/blog/BlogCard";
-import BlogSidebar from "@/components/blog/BlogSidebar";
-import FeaturedPost from "@/components/blog/FeaturedPost";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import heroImage from "@/assets/hero-safari-2.jpg";
 
 const POSTS_PER_PAGE = 9;
 
 const Blog = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const category = searchParams.get("category");
   const archive = searchParams.get("archive");
@@ -82,153 +85,151 @@ const Blog = () => {
     },
   });
 
-  const { data: recentPosts } = useQuery({
-    queryKey: ["recent-posts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("id, title, slug, featured_image_url, published_at")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const handleCategoryFilter = (slug: string | null) => {
+    if (slug) {
+      setSearchParams({ category: slug });
+    } else {
+      setSearchParams({});
+    }
+  };
 
-  const { data: archiveData } = useQuery({
-    queryKey: ["blog-archive"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("published_at")
-        .eq("is_published", true);
-      if (error) throw error;
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setSearchParams({ search: searchQuery.trim() });
+    }
+  };
 
-      const archiveMap = new Map<string, number>();
-      data.forEach((post) => {
-        const date = new Date(post.published_at);
-        const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
-        archiveMap.set(key, (archiveMap.get(key) || 0) + 1);
-      });
+  const clearFilters = () => {
+    setSearchParams({});
+    setSearchQuery("");
+  };
 
-      return Array.from(archiveMap.entries())
-        .map(([key, count]) => {
-          const [year, month] = key.split("-");
-          return { year, month, count };
-        })
-        .sort((a, b) => {
-          if (a.year !== b.year) return parseInt(b.year) - parseInt(a.year);
-          return parseInt(b.month) - parseInt(a.month);
-        })
-        .slice(0, 12);
-    },
-  });
-
-  const { data: tags } = useQuery({
-    queryKey: ["popular-tags"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("tags")
-        .eq("is_published", true);
-      if (error) throw error;
-
-      const tagCounts = new Map<string, number>();
-      data.forEach((post) => {
-        post.tags?.forEach((tag: string) => {
-          tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
-        });
-      });
-
-      return Array.from(tagCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 15)
-        .map(([tag]) => tag);
-    },
-  });
-
-  const featuredPost = posts?.[0];
-  const regularPosts = posts?.slice(1) || [];
+  const activeFilter = category || archive || search || tag;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1">
-        <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Safari Blog</h1>
-            <p className="text-xl text-center text-muted-foreground max-w-3xl mx-auto">
+        {/* Hero Section */}
+        <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative z-10 container text-center text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">Safari Blog</h1>
+            <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">
               Expert tips, inspiring stories, and comprehensive guides for your safari adventure
             </p>
           </div>
         </section>
 
-        {featuredPost && page === 1 && !category && !archive && !search && !tag && (
-          <section className="container py-12">
-            <FeaturedPost
-              title={featuredPost.title}
-              slug={featuredPost.slug}
-              excerpt={featuredPost.excerpt}
-              featuredImage={featuredPost.featured_image_url}
-              category={featuredPost.category}
-              author={featuredPost.author}
-              publishedAt={featuredPost.published_at}
-              readingTime={featuredPost.reading_time}
-            />
-          </section>
-        )}
+        {/* Filter Bar */}
+        <section className="border-b bg-background sticky top-0 z-20">
+          <div className="container py-4">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              {/* Category Pills */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <Badge
+                  variant={!category ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/90 transition-colors"
+                  onClick={() => handleCategoryFilter(null)}
+                >
+                  All Posts
+                </Badge>
+                {categories?.map((cat) => (
+                  <Badge
+                    key={cat.id}
+                    variant={category === cat.slug ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/90 transition-colors"
+                    onClick={() => handleCategoryFilter(cat.slug)}
+                  >
+                    {cat.name}
+                  </Badge>
+                ))}
+              </div>
 
-        <section className="container py-12">
-          <div className="grid lg:grid-cols-[1fr_350px] gap-8">
-            <div className="space-y-8">
-              {postsLoading ? (
-                <>
-                  {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} className="h-[400px] rounded-lg" />
-                  ))}
-                </>
-              ) : regularPosts.length > 0 ? (
-                <>
-                  {regularPosts.map((post) => (
-                    <BlogCard
-                      key={post.id}
-                      id={post.id}
-                      title={post.title}
-                      slug={post.slug}
-                      excerpt={post.excerpt}
-                      featuredImage={post.featured_image_url}
-                      category={post.category}
-                      author={post.author}
-                      publishedAt={post.published_at}
-                      readingTime={post.reading_time}
-                    />
-                  ))}
-                  {regularPosts.length === POSTS_PER_PAGE && (
-                    <div className="flex justify-center pt-8">
-                      <Button onClick={() => setPage(page + 1)}>Load More Posts</Button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No blog posts found.</p>
+              {/* Search */}
+              <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search articles..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
                 </div>
-              )}
+                <Button type="submit" size="sm">Search</Button>
+              </form>
             </div>
 
-            <aside>
-              {categories && recentPosts && archiveData && tags && (
-                <BlogSidebar
-                  categories={categories}
-                  recentPosts={recentPosts}
-                  archive={archiveData}
-                  popularTags={tags}
-                />
-              )}
-            </aside>
+            {/* Active Filter Indicator */}
+            {activeFilter && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Filtering by:</span>
+                <Badge variant="secondary" className="gap-1">
+                  {category && `Category: ${category}`}
+                  {archive && `Archive: ${archive}`}
+                  {search && `Search: "${search}"`}
+                  {tag && `Tag: ${tag}`}
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Clear
+                </Button>
+              </div>
+            )}
           </div>
+        </section>
+
+        {/* Blog Grid */}
+        <section className="container py-12">
+          {postsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-[380px] rounded-lg" />
+              ))}
+            </div>
+          ) : posts && posts.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.map((post) => (
+                  <BlogCard
+                    key={post.id}
+                    id={post.id}
+                    title={post.title}
+                    slug={post.slug}
+                    excerpt={post.excerpt}
+                    featuredImage={post.featured_image_url}
+                    category={post.category}
+                    author={post.author}
+                    publishedAt={post.published_at}
+                    readingTime={post.reading_time}
+                    compact
+                  />
+                ))}
+              </div>
+              {posts.length === POSTS_PER_PAGE && (
+                <div className="flex justify-center pt-12">
+                  <Button onClick={() => setPage(page + 1)} size="lg">
+                    Load More Posts
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">No blog posts found.</p>
+              {activeFilter && (
+                <Button variant="outline" onClick={clearFilters} className="mt-4">
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          )}
         </section>
       </main>
     </div>
