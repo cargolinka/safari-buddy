@@ -65,8 +65,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/update-password" element={<UpdatePassword />} />
-          <Route path="/vehicles" element={<Vehicles />} />
-          <Route path="/vehicles/:id" element={<PublicVehicleDetails />} />
+          <Route path="/safari-vehicles" element={<Vehicles />} />
+          <Route path="/safari-vehicles/:id" element={<PublicVehicleDetails />} />
           <Route path="/empty-legs" element={<BrowseEmptyLegs />} />
           <Route path="/about" element={<About />} />
           <Route path="/why-us" element={<WhyUs />} />

@@ -105,7 +105,7 @@ export function HeroSlideDialog({ open, onOpenChange, slide }: HeroSlideDialogPr
         subtitle: "",
         description: "",
         button_text: "Browse Vehicles",
-        button_link: "/vehicles",
+        button_link: "/safari-vehicles",
         secondary_button_text: "Learn More",
         secondary_button_link: "/about",
         display_order: 1,
@@ -450,7 +450,7 @@ export function HeroSlideDialog({ open, onOpenChange, slide }: HeroSlideDialogPr
               <Input
                 id="button_link"
                 {...register("button_link", { required: true })}
-                placeholder="/vehicles"
+                placeholder="/safari-vehicles"
               />
             </div>
 
