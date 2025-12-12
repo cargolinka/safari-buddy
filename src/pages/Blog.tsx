@@ -8,8 +8,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-safari-2.jpg";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const POSTS_PER_PAGE = 9;
 
@@ -26,6 +35,49 @@ const Blog = () => {
   useEffect(() => {
     setPage(1);
   }, [category, archive, search, tag]);
+
+  // Get total count for pagination
+  const { data: totalCount } = useQuery({
+    queryKey: ["blog-posts-count", category, archive, search, tag],
+    queryFn: async () => {
+      let query = supabase
+        .from("blog_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("is_published", true);
+
+      if (category) {
+        const { data: cat } = await supabase
+          .from("blog_categories")
+          .select("id")
+          .eq("slug", category)
+          .maybeSingle();
+        if (cat) query = query.eq("category_id", cat.id);
+      }
+
+      if (archive) {
+        const [year, month] = archive.split("-");
+        const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const endDate = new Date(parseInt(year), parseInt(month), 0);
+        query = query
+          .gte("published_at", startDate.toISOString())
+          .lte("published_at", endDate.toISOString());
+      }
+
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+      }
+
+      if (tag) {
+        query = query.contains("tags", [tag]);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const totalPages = Math.ceil((totalCount || 0) / POSTS_PER_PAGE);
 
   const { data: posts, isLoading: postsLoading } = useQuery({
     queryKey: ["blog-posts", page, category, archive, search, tag],
@@ -46,7 +98,7 @@ const Blog = () => {
           .from("blog_categories")
           .select("id")
           .eq("slug", category)
-          .single();
+          .maybeSingle();
         if (cat) query = query.eq("category_id", cat.id);
       }
 
@@ -72,6 +124,22 @@ const Blog = () => {
       return data;
     },
   });
+
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push("ellipsis");
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        pages.push(i);
+      }
+      if (page < totalPages - 2) pages.push("ellipsis");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   const { data: categories } = useQuery({
     queryKey: ["blog-categories"],
@@ -212,12 +280,38 @@ const Blog = () => {
                   />
                 ))}
               </div>
-              {posts.length === POSTS_PER_PAGE && (
-                <div className="flex justify-center pt-12">
-                  <Button onClick={() => setPage(page + 1)} size="lg">
-                    Load More Posts
-                  </Button>
-                </div>
+              {totalPages > 1 && (
+                <Pagination className="mt-12">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setPage(Math.max(1, page - 1))}
+                        className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    {getPageNumbers().map((pageNum, idx) => (
+                      <PaginationItem key={idx}>
+                        {pageNum === "ellipsis" ? (
+                          <PaginationEllipsis />
+                        ) : (
+                          <PaginationLink
+                            onClick={() => setPage(pageNum)}
+                            isActive={page === pageNum}
+                            className="cursor-pointer"
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        )}
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
+                        className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               )}
             </>
           ) : (
