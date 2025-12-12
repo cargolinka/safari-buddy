@@ -161,29 +161,39 @@ const Index = () => {
   };
 
 
-  const blogPosts = [
-    {
-      title: "Top Safari Destinations in Kenya for 2024",
-      category: "Travel Guide",
-      excerpt: "Discover the best safari destinations and plan your perfect wildlife adventure across Kenya's stunning national parks.",
-      date: "15.11.2024",
-      image: heroImage1,
-    },
-    {
-      title: "Choosing the Right Vehicle for Your Safari",
-      category: "Vehicle Guide",
-      excerpt: "Learn how to select the perfect safari vehicle based on your destination, group size, and adventure requirements.",
-      date: "10.11.2024",
-      image: heroImage2,
-    },
-    {
-      title: "Safari Safety Tips: What Every Traveler Should Know",
-      category: "Safety & Tips",
-      excerpt: "Essential safety guidelines and tips to ensure a safe and memorable safari experience in the wild.",
-      date: "05.11.2024",
-      image: heroImage3,
-    },
-  ];
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchFeaturedVehicles();
+    fetchHeroSlides();
+    fetchCategories();
+    fetchSubCategories();
+    fetchBlogPosts();
+  }, []);
+
+  const fetchBlogPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select(`
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image_url,
+          published_at,
+          category:blog_categories(name)
+        `)
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setBlogPosts(data || []);
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+    }
+  };
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -699,7 +709,7 @@ const Index = () => {
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link to="/blog">
+              <Link to="/safari-hire-blog">
                 View All Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -707,40 +717,53 @@ const Index = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogPosts.map((post, index) => (
-              <Card 
-                key={index}
-                className="group hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <Badge className="absolute top-4 left-4 bg-primary">
-                    {post.category}
-                  </Badge>
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-3">
-                    {post.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{post.date}</span>
-                    <Button variant="ghost" size="sm" className="group-hover:text-primary">
-                      Read More
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+            {blogPosts.length > 0 ? blogPosts.map((post) => (
+              <Link key={post.id} to={`/safari-hire-blog/${post.slug}`}>
+                <Card 
+                  className="group hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer h-full"
+                >
+                  <div className="relative h-56 overflow-hidden">
+                    {post.featured_image_url ? (
+                      <img 
+                        src={post.featured_image_url} 
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <span className="text-4xl">📝</span>
+                      </div>
+                    )}
+                    <Badge className="absolute top-4 left-4 bg-primary">
+                      {post.category?.name || "Blog"}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardHeader>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2">
+                      {post.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-3">
+                      {post.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        {post.published_at ? new Date(post.published_at).toLocaleDateString() : ""}
+                      </span>
+                      <Button variant="ghost" size="sm" className="group-hover:text-primary">
+                        Read More
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            )) : (
+              <div className="col-span-3 text-center py-12 text-muted-foreground">
+                No blog posts yet. Check back soon!
+              </div>
+            )}
           </div>
         </div>
       </section>
