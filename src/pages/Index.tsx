@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, Facebook, Twitter, Instagram, Mail, Phone, User, Building, DollarSign, Gavel, CheckCircle } from "lucide-react";
+import { Truck, Users, Shield, Calendar as CalendarIcon, MapPin, Car, Bus, ArrowRight, User, Building, DollarSign, Gavel, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage1 from "@/assets/hero-safari.jpg";
 import heroImage2 from "@/assets/hero-safari-2.jpg";
@@ -768,129 +769,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-muted border-t">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            {/* Company Info */}
-            <div>
-              <h3 className="text-xl font-bold mb-4">Safari Hire</h3>
-              <p className="text-muted-foreground mb-4">
-                Kenya's premier platform for safari vehicle hire, connecting clients with verified owners and professional drivers.
-              </p>
-              <div className="flex gap-3">
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Facebook className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Twitter className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Instagram className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/safari-vehicles" className="text-muted-foreground hover:text-primary transition-colors">
-                    Browse Vehicles
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">
-                    List Your Vehicle
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">
-                    Become a Driver
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">
-                    Sign In
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    How It Works
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Safety Guidelines
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Terms & Conditions
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Privacy Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="font-semibold mb-4">Contact Us</h4>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <a href="mailto:info@safarihire.co.ke" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      info@safarihire.co.ke
-                    </a>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Phone</p>
-                    <a href="tel:+254700000000" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      +254 700 000 000
-                    </a>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-muted-foreground">
-                © 2024 Safari Hire. All rights reserved.
-              </p>
-              <div className="flex gap-6">
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Terms
-                </a>
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Privacy
-                </a>
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Cookies
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
