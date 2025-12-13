@@ -248,16 +248,6 @@ const BlogPost = () => {
             </Breadcrumb>
           </div>
 
-          {post.featured_image_url && (
-            <div className="w-full h-[500px] relative">
-              <img
-                src={post.featured_image_url}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
           <div className="container py-12">
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
