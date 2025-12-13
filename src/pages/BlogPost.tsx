@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, User, ArrowLeft, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BlogCard from "@/components/blog/BlogCard";
+import BlogSidebar from "@/components/blog/BlogSidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -60,6 +61,74 @@ const BlogPost = () => {
     },
     enabled: !!post?.category_id,
   });
+
+  // Fetch categories for sidebar
+  const { data: categories = [] } = useQuery({
+    queryKey: ["blog-categories-sidebar"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch recent posts for sidebar
+  const { data: recentPosts = [] } = useQuery({
+    queryKey: ["recent-posts-sidebar"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, slug, featured_image_url, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch all published posts for archive and tags
+  const { data: allPosts = [] } = useQuery({
+    queryKey: ["all-posts-sidebar"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("published_at, tags")
+        .eq("is_published", true);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Calculate archive months
+  const archive = allPosts.reduce((acc: { month: string; year: string; count: number }[], post) => {
+    if (!post.published_at) return acc;
+    const date = new Date(post.published_at);
+    const month = (date.getMonth() + 1).toString();
+    const year = date.getFullYear().toString();
+    const existing = acc.find((a) => a.month === month && a.year === year);
+    if (existing) {
+      existing.count++;
+    } else {
+      acc.push({ month, year, count: 1 });
+    }
+    return acc;
+  }, []);
+
+  // Calculate popular tags
+  const tagCounts: Record<string, number> = {};
+  allPosts.forEach((p) => {
+    p.tags?.forEach((tag: string) => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  });
+  const popularTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([tag]) => tag);
 
   useEffect(() => {
     if (post?.id) {
@@ -190,59 +259,70 @@ const BlogPost = () => {
           )}
 
           <div className="container py-12">
-            <div className="max-w-4xl mx-auto">
-              <Button variant="ghost" asChild className="mb-6">
-                <Link to="/safari-hire-blog">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Blog
-                </Link>
-              </Button>
-
-              <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <Badge variant="default">{post.category.name}</Badge>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    {post.author.full_name}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(post.published_at).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {post.reading_time} min read
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleShare} className="ml-auto">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <Button variant="ghost" asChild className="mb-6">
+                  <Link to="/safari-hire-blog">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Blog
+                  </Link>
                 </Button>
-              </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
-              
-              <div className="prose prose-lg max-w-none">
-                <p className="text-xl text-muted-foreground mb-8">{post.excerpt}</p>
-                <div 
-                  className="blog-content"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
-              </div>
-
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t">
-                  {post.tags.map((tag: string) => (
-                    <Link key={tag} to={`/safari-hire-blog?tag=${tag}`}>
-                      <Badge variant="outline">{tag}</Badge>
-                    </Link>
-                  ))}
+                <div className="flex items-center gap-3 mb-6 flex-wrap">
+                  <Badge variant="default">{post.category.name}</Badge>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      {post.author.full_name}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(post.published_at).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {post.reading_time} min read
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleShare} className="ml-auto">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
                 </div>
-              )}
+
+                <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
+                
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-xl text-muted-foreground mb-8">{post.excerpt}</p>
+                  <div 
+                    className="blog-content"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
+                </div>
+
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t">
+                    {post.tags.map((tag: string) => (
+                      <Link key={tag} to={`/safari-hire-blog?tag=${tag}`}>
+                        <Badge variant="outline">{tag}</Badge>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <aside className="lg:col-span-1">
+                <BlogSidebar
+                  categories={categories}
+                  recentPosts={recentPosts}
+                  archive={archive}
+                  popularTags={popularTags}
+                />
+              </aside>
             </div>
           </div>
         </article>
