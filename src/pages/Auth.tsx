@@ -157,9 +157,25 @@ const Auth = () => {
             }
           }
 
-          // Check if email confirmation is required
-          if (data.user && !data.session) {
-            // Email confirmation required - user not logged in yet
+          // Send custom verification email via Resend
+          if (data.user) {
+            try {
+              const { error: verifyError } = await supabase.functions.invoke("send-verification-email", {
+                body: { 
+                  userId: data.user.id, 
+                  email: data.user.email,
+                  fullName: fullName 
+                },
+              });
+              
+              if (verifyError) {
+                console.error("Verification email error:", verifyError);
+              }
+            } catch (emailError) {
+              console.error("Failed to send verification email:", emailError);
+            }
+
+            // Show verification message
             toast({
               title: "Verify Your Email",
               description: "We've sent a verification link to your email. Please check your inbox to continue.",
@@ -172,13 +188,6 @@ const Auth = () => {
             setPhone("");
             setCountry("");
             setRole("");
-          } else if (data.session) {
-            // Auto-confirm enabled (fallback)
-            toast({
-              title: "Account Created",
-              description: "Welcome! Redirecting to your dashboard...",
-            });
-            navigate("/dashboard");
           }
         }
       } else {
