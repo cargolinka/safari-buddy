@@ -82,15 +82,24 @@ const Auth = () => {
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          // Handle "user already registered" error
+          if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+            throw new Error('An account with this email already exists. Please sign in instead.');
+          }
+          throw error;
+        }
 
         if (data.user) {
-          // Insert user role
+          // Insert user role - use upsert to handle edge cases
           const { error: roleError } = await supabase
             .from("user_roles")
-            .insert([{ user_id: data.user.id, role: role as any }]);
+            .upsert([{ user_id: data.user.id, role: role as any }], { onConflict: 'user_id,role' });
 
-          if (roleError) throw roleError;
+          if (roleError) {
+            console.error('Role assignment error:', roleError);
+            // Don't throw - user is created, role can be fixed later
+          }
 
           // Update profile
           const profileUpdate: any = { 
