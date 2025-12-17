@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PendingCompanyApprovals } from "@/components/admin/PendingCompanyApprovals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
-import { Plus, Pencil, Ban, CheckCircle, AlertCircle, Eye } from "lucide-react";
+import { Plus, Pencil, Ban, CheckCircle, AlertCircle, Eye, Trash2 } from "lucide-react";
 import { AddFleetOwnerDialog } from "@/components/admin/AddFleetOwnerDialog";
 import { EditFleetOwnerDialog } from "@/components/admin/EditFleetOwnerDialog";
 import { SuspensionEmailPreview } from "@/components/admin/SuspensionEmailPreview";
@@ -40,6 +40,9 @@ const ManageFleetOwners = () => {
   const [suspensionReason, setSuspensionReason] = useState("");
   const [suspensionNotes, setSuspensionNotes] = useState("");
   const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [ownerToDelete, setOwnerToDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchFleetOwners();
@@ -222,6 +225,51 @@ const ManageFleetOwners = () => {
     }
   };
 
+  const handleDeleteClick = (owner: any) => {
+    setOwnerToDelete(owner);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!ownerToDelete) return;
+
+    setDeleting(true);
+    try {
+      // Delete user roles first
+      const { error: rolesError } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", ownerToDelete.id);
+
+      if (rolesError) throw rolesError;
+
+      // Delete the profile (this will cascade to related data)
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", ownerToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Fleet Owner Deleted",
+        description: `${ownerToDelete.entity_type === "company" ? ownerToDelete.company_name : ownerToDelete.full_name} has been deleted successfully.`,
+      });
+
+      fetchFleetOwners();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setOwnerToDelete(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -354,6 +402,14 @@ const ManageFleetOwners = () => {
                       ) : (
                         <Ban className="h-4 w-4 text-destructive" />
                       )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteClick(owner)}
+                      title="Delete fleet owner"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
@@ -525,6 +581,33 @@ const ManageFleetOwners = () => {
           handleToggleSuspension();
         }}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Fleet Owner</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently delete{" "}
+              <strong>
+                {ownerToDelete?.entity_type === "company"
+                  ? ownerToDelete?.company_name
+                  : ownerToDelete?.full_name}
+              </strong>
+              ? This action cannot be undone and will also remove all associated data including vehicles and documents.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
