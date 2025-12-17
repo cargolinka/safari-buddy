@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import * as LucideIcons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +62,29 @@ const ManageCategories = () => {
     }
   };
 
+  const handleToggleActive = async (categoryId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("vehicle_categories")
+        .update({ is_active: !currentStatus })
+        .eq("id", categoryId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Category ${!currentStatus ? "published" : "hidden"} successfully`,
+      });
+      fetchCategories();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const getIconComponent = (iconName: string) => {
     const Icon = (LucideIcons as any)[iconName];
     return Icon ? <Icon className="h-6 w-6 text-primary mt-1" /> : <LucideIcons.Car className="h-6 w-6 text-primary mt-1" />;
@@ -99,11 +123,25 @@ const ManageCategories = () => {
                     )}
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium">{category.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{category.name}</h3>
+                          {!category.is_active && (
+                            <Badge variant="secondary" className="text-xs">Hidden</Badge>
+                          )}
+                        </div>
                         <Badge variant="outline">{category.slug}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{category.description}</p>
-                      <div className="flex gap-2 mt-3">
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-2 mr-2">
+                          <Switch
+                            checked={category.is_active}
+                            onCheckedChange={() => handleToggleActive(category.id, category.is_active)}
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {category.is_active ? "Published" : "Hidden"}
+                          </span>
+                        </div>
                         <CategoryDialog category={category} onSuccess={fetchCategories} />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
