@@ -52,8 +52,21 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
     },
   });
 
+  const queryClient = useQueryClient();
+
   const createFleetOwnerMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      // Check if email already exists
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("email", data.email)
+        .maybeSingle();
+
+      if (existingProfile) {
+        throw new Error("A user with this email already exists");
+      }
+
       // Create auth user with signUp
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -62,6 +75,7 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
           data: {
             full_name: data.full_name,
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
@@ -70,6 +84,9 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
 
       const userId = authData.user.id;
 
+      // Wait a moment for the trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Update profile with additional data
       const profileData: any = {
         full_name: data.full_name,
@@ -77,6 +94,7 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
         country: data.country,
         entity_type: data.entity_type,
         is_fleet_owner: true,
+        email: data.email,
       };
 
       if (data.entity_type === "company") {
@@ -90,24 +108,36 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
         .update(profileData)
         .eq("id", userId);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
 
-      // Add owner role
+      // Add owner role using upsert to handle edge cases
       const { error: roleError } = await supabase
         .from("user_roles")
-        .insert({
-          user_id: userId,
-          role: "owner",
-        });
+        .upsert(
+          {
+            user_id: userId,
+            role: "owner" as const,
+          },
+          {
+            onConflict: "user_id,role",
+          }
+        );
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error("Role assignment error:", roleError);
+        throw new Error(`Failed to assign owner role: ${roleError.message}`);
+      }
 
       return authData.user;
     },
     onSuccess: () => {
-      toast.success("Fleet owner created successfully");
+      toast.success("Fleet owner created successfully with owner role");
       reset();
       setEntityType("individual");
+      queryClient.invalidateQueries({ queryKey: ["fleet-owners"] });
       onSuccess();
       onOpenChange(false);
     },
