@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { COUNTRIES } from "@/lib/countries";
+import { useActiveCountries } from "@/hooks/useActiveCountries";
 import { ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { data: countries = [] } = useActiveCountries();
   const redirectTo = searchParams.get("redirect");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -302,7 +303,7 @@ const Auth = () => {
                         <SelectValue placeholder="Select your country" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[200px]">
-                        {COUNTRIES.map((c) => (
+                        {countries.map((c) => (
                           <SelectItem key={c.code} value={c.name}>
                             {c.name}
                           </SelectItem>

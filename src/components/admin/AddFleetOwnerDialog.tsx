@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { COUNTRIES } from "@/lib/countries";
+import { useActiveCountries } from "@/hooks/useActiveCountries";
 
 interface AddFleetOwnerDialogProps {
   open: boolean;
@@ -43,6 +43,7 @@ interface FormData {
 }
 
 export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetOwnerDialogProps) {
+  const { data: countries = [] } = useActiveCountries();
   const [entityType, setEntityType] = useState<"individual" | "company">("individual");
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     defaultValues: {
@@ -265,7 +266,7 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
-                  {COUNTRIES.map((country) => (
+                  {countries.map((country) => (
                     <SelectItem key={country.code} value={country.name}>
                       {country.name}
                     </SelectItem>

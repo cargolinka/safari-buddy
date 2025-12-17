@@ -31,6 +31,7 @@ import CreateTestData from "./pages/admin/CreateTestData";
 import BlogPost from "./pages/BlogPost";
 import ManageBlog from "./pages/admin/ManageBlog";
 import ManageBlogCategories from "./pages/admin/ManageBlogCategories";
+import ManageCountries from "./pages/admin/ManageCountries";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerVehicles from "./pages/owner/OwnerVehicles";
 import AddVehicle from "./pages/owner/AddVehicle";
@@ -93,6 +94,7 @@ const App = () => (
               <Route path="test-data" element={<CreateTestData />} />
               <Route path="blog" element={<ManageBlog />} />
               <Route path="blog-categories" element={<ManageBlogCategories />} />
+              <Route path="countries" element={<ManageCountries />} />
             </Route>
           
           {/* Owner Routes */}
