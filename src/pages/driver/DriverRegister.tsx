@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { RegistrationSteps } from "@/components/driver/RegistrationSteps";
 import { DocumentUploadField } from "@/components/driver/DocumentUploadField";
-import { COUNTRIES } from "@/lib/countries";
+import { useActiveCountries } from "@/hooks/useActiveCountries";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { addRole } from "@/lib/roleHelpers";
@@ -25,6 +25,7 @@ const STEPS = [
 
 export default function DriverRegister() {
   const navigate = useNavigate();
+  const { data: countries = [] } = useActiveCountries();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -357,7 +358,7 @@ export default function DriverRegister() {
                       <SelectValue placeholder="Select your country" />
                     </SelectTrigger>
                     <SelectContent className="max-h-[200px]">
-                      {COUNTRIES.map((c) => (
+                      {countries.map((c) => (
                         <SelectItem key={c.code} value={c.name}>
                           {c.name}
                         </SelectItem>
