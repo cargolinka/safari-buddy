@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import heroImage3 from "@/assets/hero-safari-3.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [vehicleType, setVehicleType] = useState<string>("");
   const [vehicleSubCategory, setVehicleSubCategory] = useState<string>("");
   const [startLocation, setStartLocation] = useState<string>("");
@@ -32,6 +34,23 @@ const Index = () => {
     fetchCategories();
     fetchSubCategories();
   }, []);
+
+  // Handle email verification callback
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'signup' || type === 'email_change') {
+      toast({
+        title: "Email Verified!",
+        description: "Your email has been verified. You can now sign in.",
+      });
+      // Clear the hash from URL
+      window.history.replaceState(null, '', window.location.pathname);
+      // Redirect to auth page for sign in
+      navigate('/auth');
+    }
+  }, [toast, navigate]);
 
   // Filter subcategories when vehicle type (category) changes
   useEffect(() => {

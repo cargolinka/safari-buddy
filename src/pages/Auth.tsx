@@ -157,12 +157,29 @@ const Auth = () => {
             }
           }
 
-          toast({
-            title: "Account Created",
-            description: "Welcome! Redirecting to your dashboard...",
-          });
-
-          navigate("/dashboard");
+          // Check if email confirmation is required
+          if (data.user && !data.session) {
+            // Email confirmation required - user not logged in yet
+            toast({
+              title: "Verify Your Email",
+              description: "We've sent a verification link to your email. Please check your inbox to continue.",
+            });
+            // Clear form and switch to sign-in tab
+            setIsSignUp(false);
+            setEmail("");
+            setPassword("");
+            setFullName("");
+            setPhone("");
+            setCountry("");
+            setRole("");
+          } else if (data.session) {
+            // Auto-confirm enabled (fallback)
+            toast({
+              title: "Account Created",
+              description: "Welcome! Redirecting to your dashboard...",
+            });
+            navigate("/dashboard");
+          }
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
