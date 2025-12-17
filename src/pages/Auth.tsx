@@ -91,14 +91,16 @@ const Auth = () => {
         }
 
         if (data.user) {
-          // Insert user role - use upsert to handle edge cases
-          const { error: roleError } = await supabase
-            .from("user_roles")
-            .upsert([{ user_id: data.user.id, role: role as any }], { onConflict: 'user_id,role' });
+          // Assign user role using edge function (bypasses RLS)
+          const { data: roleData, error: roleError } = await supabase.functions.invoke("assign-role", {
+            body: { userId: data.user.id, role: role },
+          });
 
           if (roleError) {
             console.error('Role assignment error:', roleError);
             // Don't throw - user is created, role can be fixed later
+          } else if (roleData?.error) {
+            console.error('Role assignment failed:', roleData.error);
           }
 
           // Update profile
