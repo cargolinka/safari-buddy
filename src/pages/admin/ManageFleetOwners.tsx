@@ -56,6 +56,29 @@ const ManageFleetOwners = () => {
 
       if (error) throw error;
 
+      // Fetch user roles for all fleet owners
+      const ownerIds = (data || []).map(o => o.id);
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("user_id", ownerIds);
+
+      if (rolesError) throw rolesError;
+
+      // Map roles to owners
+      const rolesMap = new Map<string, string[]>();
+      (rolesData || []).forEach(r => {
+        const existing = rolesMap.get(r.user_id) || [];
+        existing.push(r.role);
+        rolesMap.set(r.user_id, existing);
+      });
+
+      // Attach roles to each owner
+      const ownersWithRoles = (data || []).map(owner => ({
+        ...owner,
+        roles: rolesMap.get(owner.id) || []
+      }));
+
       // Fetch pending companies (those with unverified documents)
       const { data: pendingCompaniesData, error: pendingError } = await supabase
         .from("profiles")
@@ -75,7 +98,7 @@ const ManageFleetOwners = () => {
       );
 
       setPendingCompanies(pending);
-      setOwners(data || []);
+      setOwners(ownersWithRoles);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -84,6 +107,28 @@ const ManageFleetOwners = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case "admin": return "bg-violet-500/20 text-violet-700 border-violet-300";
+      case "driver": return "bg-blue-500/20 text-blue-700 border-blue-300";
+      case "owner": return "bg-green-500/20 text-green-700 border-green-300";
+      case "client_corporate": return "bg-orange-500/20 text-orange-700 border-orange-300";
+      case "client_individual": return "bg-gray-500/20 text-gray-700 border-gray-300";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case "admin": return "Admin";
+      case "driver": return "Driver";
+      case "owner": return "Owner";
+      case "client_corporate": return "Corporate";
+      case "client_individual": return "Individual";
+      default: return role;
     }
   };
 
@@ -236,7 +281,20 @@ const ManageFleetOwners = () => {
                         {owner.account_status === "suspended" ? "Suspended" : "Active"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">Type: {owner.entity_type}</p>
+                    <p className="text-sm text-muted-foreground">Type: {owner.entity_type || "Not set"}</p>
+                    {owner.roles && owner.roles.length > 0 && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className="text-sm text-muted-foreground">Roles:</span>
+                        {owner.roles.map((role: string) => (
+                          <span
+                            key={role}
+                            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ${getRoleBadgeVariant(role)}`}
+                          >
+                            {getRoleLabel(role)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {owner.entity_type === "company" && (
                       <>
                         <p className="text-sm text-muted-foreground">Reg: {owner.company_registration_number}</p>
