@@ -113,22 +113,19 @@ export function AddFleetOwnerDialog({ open, onOpenChange, onSuccess }: AddFleetO
         throw profileError;
       }
 
-      // Add owner role using upsert to handle edge cases
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .upsert(
-          {
-            user_id: userId,
-            role: "owner" as const,
-          },
-          {
-            onConflict: "user_id,role",
-          }
-        );
+      // Add owner role using edge function (bypasses RLS)
+      const { data: roleData, error: roleError } = await supabase.functions.invoke("assign-role", {
+        body: { userId, role: "owner" },
+      });
 
       if (roleError) {
         console.error("Role assignment error:", roleError);
         throw new Error(`Failed to assign owner role: ${roleError.message}`);
+      }
+
+      if (roleData?.error) {
+        console.error("Role assignment failed:", roleData.error);
+        throw new Error(`Failed to assign owner role: ${roleData.error}`);
       }
 
       return authData.user;
