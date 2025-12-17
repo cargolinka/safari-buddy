@@ -53,6 +53,7 @@ const Index = () => {
       const { data: categoriesData, error: catError } = await supabase
         .from("vehicle_categories")
         .select("*")
+        .eq("is_active", true)
         .order("name", { ascending: true });
 
       if (catError) throw catError;

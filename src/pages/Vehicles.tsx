@@ -58,6 +58,7 @@ const Vehicles = () => {
       const { data, error } = await supabase
         .from("vehicle_categories")
         .select("*")
+        .eq("is_active", true)
         .order("name");
       
       if (error) throw error;

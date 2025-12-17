@@ -41,6 +41,7 @@ const Gallery = () => {
       const { data: cats, error: catsError } = await supabase
         .from("vehicle_categories")
         .select("id, name, image_url")
+        .eq("is_active", true)
         .order("name");
       
       if (catsError) throw catsError;

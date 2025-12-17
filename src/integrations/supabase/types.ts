@@ -884,6 +884,7 @@ export type Database = {
           icon_name: string
           id: string
           image_url: string | null
+          is_active: boolean
           name: string
           slug: string
           updated_at: string
@@ -894,6 +895,7 @@ export type Database = {
           icon_name?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           name: string
           slug: string
           updated_at?: string
@@ -904,6 +906,7 @@ export type Database = {
           icon_name?: string
           id?: string
           image_url?: string | null
+          is_active?: boolean
           name?: string
           slug?: string
           updated_at?: string
