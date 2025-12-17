@@ -53,6 +53,7 @@ import ViewBids from "./pages/client/ViewBids";
 import BrowseBidRequests from "./pages/driver/BrowseBidRequests";
 import SubmitBid from "./pages/driver/SubmitBid";
 import UpdatePassword from "./pages/UpdatePassword";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/safari-vehicles" element={<Vehicles />} />
           <Route path="/safari-vehicles/:id" element={<PublicVehicleDetails />} />
