@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BlogCard from "@/components/blog/BlogCard";
-import FeaturedPost from "@/components/blog/FeaturedPost";
 import NewsletterCTA from "@/components/blog/NewsletterCTA";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import BlogSidebar from "@/components/blog/BlogSidebar";
+import blogHeroImage from "@/assets/blog-hero.jpg";
 import {
   Pagination,
   PaginationContent,
@@ -23,7 +23,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 5;
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -241,37 +241,28 @@ const Blog = () => {
 
   const activeFilter = category || archive || search || tag;
 
-  // Extract featured (latest) post and remaining posts
-  const featuredPost = !activeFilter && page === 1 && posts?.[0] ? posts[0] : null;
-  const gridPosts = featuredPost ? posts?.slice(1) : posts;
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1">
-        {/* Featured Latest Post Hero */}
-        {featuredPost && featuredPost.category && featuredPost.author ? (
-          <section className="container pt-8 pb-4">
-            <FeaturedPost
-              title={featuredPost.title}
-              slug={featuredPost.slug}
-              excerpt={featuredPost.excerpt}
-              featuredImage={featuredPost.featured_image_url || undefined}
-              category={featuredPost.category}
-              author={featuredPost.author}
-              publishedAt={featuredPost.published_at || featuredPost.created_at}
-              readingTime={featuredPost.reading_time || 5}
-            />
-          </section>
-        ) : !postsLoading && !activeFilter && page === 1 ? null : null}
-
-        {/* Loading state for featured post */}
-        {postsLoading && !activeFilter && page === 1 && (
-          <section className="container pt-8 pb-4">
-            <Skeleton className="h-[500px] rounded-lg" />
-          </section>
-        )}
+        {/* Hero Banner */}
+        <section className="relative h-[340px] md:h-[420px] overflow-hidden">
+          <img
+            src={blogHeroImage}
+            alt="Safari Blog"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+            <div className="container">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">Safari Blog</h1>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Stories, tips, and guides for your next African safari adventure.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Filter Bar */}
         <section className="border-b bg-background sticky top-0 z-20">
@@ -333,15 +324,15 @@ const Blog = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {postsLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} className="h-[380px] rounded-lg" />
+                <div className="space-y-6">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-[200px] rounded-lg" />
                   ))}
                 </div>
-              ) : gridPosts && gridPosts.length > 0 ? (
+              ) : posts && posts.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {gridPosts.map((post) => (
+                  <div className="space-y-6">
+                    {posts.map((post) => (
                       <BlogCard
                         key={post.id}
                         id={post.id}
@@ -353,7 +344,6 @@ const Blog = () => {
                         author={post.author}
                         publishedAt={post.published_at}
                         readingTime={post.reading_time}
-                        compact
                       />
                     ))}
                   </div>
