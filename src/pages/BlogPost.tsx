@@ -226,6 +226,24 @@ const BlogPost = () => {
       
       <main className="flex-1">
         <article>
+          {/* Hero Image */}
+          {post.featured_image_url && (
+            <section className="relative h-[340px] md:h-[480px] overflow-hidden">
+              <img
+                src={post.featured_image_url}
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                <div className="container">
+                  {post.category && <Badge className="mb-3">{post.category.name}</Badge>}
+                  <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3 max-w-3xl">{post.title}</h1>
+                </div>
+              </div>
+            </section>
+          )}
+
           <div className="container py-8">
             <Breadcrumb>
               <BreadcrumbList>
@@ -259,7 +277,7 @@ const BlogPost = () => {
                 </Button>
 
                 <div className="flex items-center gap-3 mb-6 flex-wrap">
-                  {post.category && <Badge variant="default">{post.category.name}</Badge>}
+                  {!post.featured_image_url && post.category && <Badge variant="default">{post.category.name}</Badge>}
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     {post.author?.full_name && (
                     <div className="flex items-center gap-1">
@@ -286,7 +304,9 @@ const BlogPost = () => {
                   </Button>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
+                {!post.featured_image_url && (
+                  <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
+                )}
                 
                 <div className="prose prose-lg max-w-none">
                   <p className="text-xl text-muted-foreground mb-8">{post.excerpt}</p>
