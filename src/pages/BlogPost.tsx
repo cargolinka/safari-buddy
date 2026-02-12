@@ -259,12 +259,14 @@ const BlogPost = () => {
                 </Button>
 
                 <div className="flex items-center gap-3 mb-6 flex-wrap">
-                  <Badge variant="default">{post.category.name}</Badge>
+                  {post.category && <Badge variant="default">{post.category.name}</Badge>}
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    {post.author?.full_name && (
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
                       {post.author.full_name}
                     </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       {new Date(post.published_at).toLocaleDateString("en-US", {
