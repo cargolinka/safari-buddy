@@ -4,13 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BlogCard from "@/components/blog/BlogCard";
+import FeaturedPost from "@/components/blog/FeaturedPost";
+import NewsletterCTA from "@/components/blog/NewsletterCTA";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import heroImage from "@/assets/hero-safari-2.jpg";
+import { Search } from "lucide-react";
 import BlogSidebar from "@/components/blog/BlogSidebar";
 import {
   Pagination,
@@ -155,7 +156,6 @@ const Blog = () => {
     },
   });
 
-  // Get recent posts for sidebar
   const { data: recentPosts } = useQuery({
     queryKey: ["recent-blog-posts"],
     queryFn: async () => {
@@ -170,7 +170,6 @@ const Blog = () => {
     },
   });
 
-  // Get archive months for sidebar
   const { data: archiveData } = useQuery({
     queryKey: ["blog-archive"],
     queryFn: async () => {
@@ -181,7 +180,6 @@ const Blog = () => {
         .order("published_at", { ascending: false });
       if (error) throw error;
 
-      // Group by month/year
       const months: { [key: string]: number } = {};
       data?.forEach((post) => {
         if (post.published_at) {
@@ -198,7 +196,6 @@ const Blog = () => {
     },
   });
 
-  // Get popular tags for sidebar
   const { data: popularTags } = useQuery({
     queryKey: ["popular-tags"],
     queryFn: async () => {
@@ -244,31 +241,42 @@ const Blog = () => {
 
   const activeFilter = category || archive || search || tag;
 
+  // Extract featured (latest) post and remaining posts
+  const featuredPost = !activeFilter && page === 1 && posts?.[0] ? posts[0] : null;
+  const gridPosts = featuredPost ? posts?.slice(1) : posts;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative z-10 container text-center text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">Safari Blog</h1>
-            <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">
-              Expert tips, inspiring stories, and comprehensive guides for your safari adventure
-            </p>
-          </div>
-        </section>
+        {/* Featured Latest Post Hero */}
+        {featuredPost && featuredPost.category && featuredPost.author ? (
+          <section className="container pt-8 pb-4">
+            <FeaturedPost
+              title={featuredPost.title}
+              slug={featuredPost.slug}
+              excerpt={featuredPost.excerpt}
+              featuredImage={featuredPost.featured_image_url || undefined}
+              category={featuredPost.category}
+              author={featuredPost.author}
+              publishedAt={featuredPost.published_at || featuredPost.created_at}
+              readingTime={featuredPost.reading_time || 5}
+            />
+          </section>
+        ) : !postsLoading && !activeFilter && page === 1 ? null : null}
+
+        {/* Loading state for featured post */}
+        {postsLoading && !activeFilter && page === 1 && (
+          <section className="container pt-8 pb-4">
+            <Skeleton className="h-[500px] rounded-lg" />
+          </section>
+        )}
 
         {/* Filter Bar */}
         <section className="border-b bg-background sticky top-0 z-20">
           <div className="container py-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              {/* Category Pills */}
               <div className="flex flex-wrap gap-2 items-center">
                 <Badge
                   variant={!category ? "default" : "outline"}
@@ -289,7 +297,6 @@ const Blog = () => {
                 ))}
               </div>
 
-              {/* Search */}
               <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
                 <div className="relative flex-1 md:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -304,7 +311,6 @@ const Blog = () => {
               </form>
             </div>
 
-            {/* Active Filter Indicator */}
             {activeFilter && (
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Filtering by:</span>
@@ -325,7 +331,6 @@ const Blog = () => {
         {/* Blog Grid with Sidebar */}
         <section className="container py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content - 2 columns on large screens */}
             <div className="lg:col-span-2">
               {postsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -333,10 +338,10 @@ const Blog = () => {
                     <Skeleton key={i} className="h-[380px] rounded-lg" />
                   ))}
                 </div>
-              ) : posts && posts.length > 0 ? (
+              ) : gridPosts && gridPosts.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {posts.map((post) => (
+                    {gridPosts.map((post) => (
                       <BlogCard
                         key={post.id}
                         id={post.id}
@@ -398,7 +403,6 @@ const Blog = () => {
               )}
             </div>
 
-            {/* Right Sidebar */}
             <div className="lg:col-span-1">
               <BlogSidebar
                 categories={categories?.map(cat => ({
@@ -414,6 +418,9 @@ const Blog = () => {
             </div>
           </div>
         </section>
+
+        {/* Newsletter CTA */}
+        <NewsletterCTA />
       </main>
 
       <Footer />

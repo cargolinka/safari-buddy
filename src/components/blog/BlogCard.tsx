@@ -37,13 +37,13 @@ const BlogCard = ({
 }: BlogCardProps) => {
   if (compact) {
     return (
-      <Card className="overflow-hidden group h-full flex flex-col">
-        <div className="relative aspect-[16/10] overflow-hidden">
+      <Card className="overflow-hidden group h-full flex flex-col hover:shadow-lg transition-shadow duration-300">
+        <div className="relative aspect-[16/9] overflow-hidden">
           {featuredImage ? (
             <img
               src={featuredImage}
               alt={title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -51,46 +51,35 @@ const BlogCard = ({
             </div>
           )}
           {category && (
-            <Badge className="absolute top-3 left-3 bg-primary/90">
+            <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground">
               {category.name}
             </Badge>
           )}
         </div>
-        <CardContent className="p-4 flex-1 flex flex-col">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-            {publishedAt && (
+        <CardContent className="p-5 flex-1 flex flex-col">
+          <Link to={`/safari-hire-blog/${slug}`}>
+            <h3 className="font-bold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+          </Link>
+          <p className="text-sm text-muted-foreground line-clamp-2 flex-1 mb-3">
+            {excerpt}
+          </p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-auto pt-3 border-t border-border">
+            {author && (
               <span className="flex items-center gap-1">
+                <User className="h-3 w-3" />
+                {author.full_name}
+              </span>
+            )}
+            {publishedAt && (
+              <span className="flex items-center gap-1 ml-auto">
                 <Calendar className="h-3 w-3" />
                 {format(new Date(publishedAt), "MMM d, yyyy")}
               </span>
             )}
-            {readingTime && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {readingTime} min
-              </span>
-            )}
           </div>
-          <Link to={`/safari-hire-blog/${slug}`}>
-            <h3 className="font-semibold text-lg leading-tight mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-              {title}
-            </h3>
-          </Link>
-          <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
-            {excerpt}
-          </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0 flex items-center justify-between">
-          {author && (
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <User className="h-3 w-3" />
-              {author.full_name}
-            </span>
-          )}
-          <Button variant="link" size="sm" className="p-0 h-auto" asChild>
-            <Link to={`/safari-hire-blog/${slug}`}>Read More →</Link>
-          </Button>
-        </CardFooter>
       </Card>
     );
   }
