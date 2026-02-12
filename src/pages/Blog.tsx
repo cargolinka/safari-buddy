@@ -23,7 +23,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const POSTS_PER_PAGE = 5;
+const POSTS_PER_PAGE = 15;
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -321,17 +321,17 @@ const Blog = () => {
 
         {/* Blog Grid with Sidebar */}
         <section className="container py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+          <div className="space-y-12">
+            <div>
               {postsLoading ? (
-                <div className="space-y-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-[200px] rounded-lg" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(15)].map((_, i) => (
+                    <Skeleton key={i} className="h-[320px] rounded-lg" />
                   ))}
                 </div>
               ) : posts && posts.length > 0 ? (
                 <>
-                  <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {posts.map((post) => (
                       <BlogCard
                         key={post.id}
@@ -344,6 +344,7 @@ const Blog = () => {
                         author={post.author}
                         publishedAt={post.published_at}
                         readingTime={post.reading_time}
+                        compact
                       />
                     ))}
                   </div>
@@ -393,7 +394,7 @@ const Blog = () => {
               )}
             </div>
 
-            <div className="lg:col-span-1">
+            <div>
               <BlogSidebar
                 categories={categories?.map(cat => ({
                   id: cat.id,
