@@ -70,7 +70,7 @@ const ManageBlog = () => {
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
-            <div>
+            <div className="text-left">
               <h1 className="text-3xl font-bold">Manage Blog Posts</h1>
               <p className="text-muted-foreground">Create and manage your blog content</p>
             </div>
