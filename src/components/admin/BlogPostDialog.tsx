@@ -181,7 +181,7 @@ const BlogPostDialog = ({ open, onOpenChange, post }: BlogPostDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{post ? "Edit Post" : "Create New Post"}</DialogTitle>
         </DialogHeader>
