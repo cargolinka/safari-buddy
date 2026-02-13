@@ -58,10 +58,14 @@ export type Database = {
           budget_range_min: number | null
           client_id: string
           created_at: string
+          daily_itinerary: Json | null
           description: string
           destination: string
+          dropoff_location: string | null
           expires_at: string | null
+          general_comments: string | null
           id: string
+          inclusives: string[] | null
           origin: string
           passengers: number
           pickup_date: string
@@ -79,10 +83,14 @@ export type Database = {
           budget_range_min?: number | null
           client_id: string
           created_at?: string
+          daily_itinerary?: Json | null
           description: string
           destination: string
+          dropoff_location?: string | null
           expires_at?: string | null
+          general_comments?: string | null
           id?: string
+          inclusives?: string[] | null
           origin: string
           passengers: number
           pickup_date: string
@@ -100,10 +108,14 @@ export type Database = {
           budget_range_min?: number | null
           client_id?: string
           created_at?: string
+          daily_itinerary?: Json | null
           description?: string
           destination?: string
+          dropoff_location?: string | null
           expires_at?: string | null
+          general_comments?: string | null
           id?: string
+          inclusives?: string[] | null
           origin?: string
           passengers?: number
           pickup_date?: string
