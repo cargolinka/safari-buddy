@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +8,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Plus, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
+
+const INCLUSIVE_OPTIONS = [
+  "Vehicle Hire",
+  "Driver's Allowance",
+  "Fuel",
+  "Driver & Vehicle Park Fees",
+  "Parking",
+  "Others",
+];
+
+interface DayItinerary {
+  date: string;
+  description: string;
+}
 
 const CreateBidRequest = () => {
   const navigate = useNavigate();
@@ -22,16 +36,54 @@ const CreateBidRequest = () => {
     description: "",
     origin: "",
     destination: "",
+    dropoff_location: "",
     pickup_date: "",
     pickup_time: "",
     return_date: "",
     return_time: "",
     vehicle_type: "",
     passengers: "",
-    with_driver: true,
     budget_range_min: "",
     budget_range_max: "",
+    general_comments: "",
   });
+
+  const [dailyItinerary, setDailyItinerary] = useState<DayItinerary[]>([]);
+  const [selectedInclusives, setSelectedInclusives] = useState<string[]>([]);
+
+  // Auto-generate days when pickup/return dates change
+  useMemo(() => {
+    if (formData.pickup_date) {
+      const start = new Date(formData.pickup_date);
+      const end = formData.return_date ? new Date(formData.return_date) : start;
+      const days: DayItinerary[] = [];
+      const current = new Date(start);
+      while (current <= end) {
+        const dateStr = current.toISOString().split("T")[0];
+        const existing = dailyItinerary.find((d) => d.date === dateStr);
+        days.push({
+          date: dateStr,
+          description: existing?.description || "",
+        });
+        current.setDate(current.getDate() + 1);
+      }
+      if (JSON.stringify(days.map(d => d.date)) !== JSON.stringify(dailyItinerary.map(d => d.date))) {
+        setDailyItinerary(days);
+      }
+    }
+  }, [formData.pickup_date, formData.return_date]);
+
+  const toggleInclusive = (item: string) => {
+    setSelectedInclusives((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+    );
+  };
+
+  const updateItineraryDay = (index: number, description: string) => {
+    setDailyItinerary((prev) =>
+      prev.map((day, i) => (i === index ? { ...day, description } : day))
+    );
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -43,6 +95,7 @@ const CreateBidRequest = () => {
         .insert({
           ...data,
           client_id: user.id,
+          with_driver: true, // Always chauffeur driven
         });
 
       if (error) throw error;
@@ -70,15 +123,26 @@ const CreateBidRequest = () => {
       description: formData.description,
       origin: formData.origin,
       destination: formData.destination,
+      dropoff_location: formData.dropoff_location || null,
       pickup_date: formData.pickup_date,
       pickup_time: formData.pickup_time,
       return_date: formData.return_date || null,
       return_time: formData.return_time || null,
       vehicle_type: formData.vehicle_type || null,
       passengers: parseInt(formData.passengers),
-      with_driver: formData.with_driver,
       budget_range_min: formData.budget_range_min ? parseFloat(formData.budget_range_min) : null,
       budget_range_max: formData.budget_range_max ? parseFloat(formData.budget_range_max) : null,
+      daily_itinerary: dailyItinerary.filter((d) => d.description.trim()),
+      inclusives: selectedInclusives,
+      general_comments: formData.general_comments || null,
+    });
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -98,7 +162,7 @@ const CreateBidRequest = () => {
             <CardHeader>
               <CardTitle>Trip Details</CardTitle>
               <CardDescription>
-                Provide complete information to get accurate bids
+                Provide complete information to get accurate bids. All hires include a professional chauffeur.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -130,13 +194,13 @@ const CreateBidRequest = () => {
                   <div className="space-y-2">
                     <Label htmlFor="origin">
                       <MapPin className="w-4 h-4 inline mr-1" />
-                      Origin *
+                      Pick Up Point *
                     </Label>
                     <Input
                       id="origin"
                       value={formData.origin}
                       onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-                      placeholder="e.g., Nairobi"
+                      placeholder="e.g., JKIA Airport, Nairobi"
                       required
                     />
                   </div>
@@ -154,6 +218,19 @@ const CreateBidRequest = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dropoff_location">
+                    <MapPin className="w-4 h-4 inline mr-1" />
+                    Drop Off Point
+                  </Label>
+                  <Input
+                    id="dropoff_location"
+                    value={formData.dropoff_location}
+                    onChange={(e) => setFormData({ ...formData, dropoff_location: e.target.value })}
+                    placeholder="e.g., Nairobi CBD or same as pick up"
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,6 +282,33 @@ const CreateBidRequest = () => {
                   </div>
                 </div>
 
+                {/* Daily Itinerary Section */}
+                {dailyItinerary.length > 0 && (
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Daily Itinerary</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Add comments for each day to help drivers provide accurate quotes
+                    </p>
+                    <div className="space-y-3">
+                      {dailyItinerary.map((day, index) => (
+                        <div key={day.date} className="flex gap-3 items-start">
+                          <div className="min-w-[120px] pt-2">
+                            <span className="text-sm font-medium text-primary">
+                              {formatDate(day.date)}
+                            </span>
+                          </div>
+                          <Input
+                            value={day.description}
+                            onChange={(e) => updateItineraryDay(index, e.target.value)}
+                            placeholder={`e.g., Pick up from Airport, drive to lodge...`}
+                            className="flex-1"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="vehicle_type">Preferred Vehicle Type</Label>
@@ -238,20 +342,27 @@ const CreateBidRequest = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <Label htmlFor="with_driver" className="cursor-pointer">
-                      Include Professional Driver
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Hire a vehicle with an experienced driver
-                    </p>
+                {/* Inclusives Section */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">What Should Be Included?</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Select what you need included in the bid price
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {INCLUSIVE_OPTIONS.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => toggleInclusive(item)}
+                      >
+                        <Checkbox
+                          checked={selectedInclusives.includes(item)}
+                          onCheckedChange={() => toggleInclusive(item)}
+                        />
+                        <Label className="cursor-pointer font-normal">{item}</Label>
+                      </div>
+                    ))}
                   </div>
-                  <Switch
-                    id="with_driver"
-                    checked={formData.with_driver}
-                    onCheckedChange={(checked) => setFormData({ ...formData, with_driver: checked })}
-                  />
                 </div>
 
                 <div className="space-y-4">
@@ -280,6 +391,18 @@ const CreateBidRequest = () => {
                   <p className="text-sm text-muted-foreground">
                     Setting a budget range helps you receive more relevant bids
                   </p>
+                </div>
+
+                {/* General Comments */}
+                <div className="space-y-2">
+                  <Label htmlFor="general_comments">General Comments (Optional)</Label>
+                  <Textarea
+                    id="general_comments"
+                    value={formData.general_comments}
+                    onChange={(e) => setFormData({ ...formData, general_comments: e.target.value })}
+                    placeholder="Any additional notes, special requirements, or preferences..."
+                    rows={3}
+                  />
                 </div>
 
                 <div className="flex gap-3 pt-4">
