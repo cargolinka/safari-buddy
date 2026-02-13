@@ -1,47 +1,65 @@
 
 
-# Redesigned Blog Page - Magazine-Style Layout
+# Create Admin Account: jambo@safarihirehub.com
 
-Inspired by the reference site's clean card-based design, the blog page at `/safari-hire-blog` will be redesigned with a more engaging, magazine-style layout featuring a prominent featured/latest post hero and improved visual hierarchy.
+Since the project is now connected to your own Supabase "hire" project, we'll create a dedicated edge function that securely creates the admin account using the service role key (bypassing RLS).
 
-## What Changes
+## Approach
 
-### 1. Featured/Latest Post Hero Section
-- Replace the current static hero image with a **dynamic featured post hero** that showcases the most recent blog post
-- Full-width card with large image, overlay gradient, category badge, title, excerpt, author, date, and "Read Full Article" button (uses the existing `FeaturedPost` component)
+We'll create a one-time-use edge function called `create-admin` that:
 
-### 2. Improved Blog Card Design
-- Update `BlogCard` compact variant to match the reference site style: horizontal card layout with image on left, content on right (similar to the reference's subcategory cards)
-- Add article count badges and cleaner typography
-- Improve hover effects with subtle shadow elevation
+1. Creates the user in Supabase Auth with email `jambo@safarihirehub.com` (email auto-confirmed)
+2. Updates the `profiles` table with admin details
+3. Inserts the `admin` role into `user_roles`
 
-### 3. Restructured Page Layout
-The new page structure:
-1. **Header** (existing)
-2. **Featured Latest Post** - large hero showcasing the newest published post
-3. **Sticky Filter Bar** - category pills + search (kept from current design)
-4. **Blog Grid** - remaining posts in a responsive 3-column grid (no sidebar on main listing)
-5. **Sidebar** - categories, recent posts, archive, tags (moved below on mobile, right side on desktop)
-6. **Pagination** (existing)
-7. **Newsletter CTA** - a call-to-action banner before footer
-8. **Footer** (existing)
+After running it once, you can delete the function.
 
-### 4. Newsletter CTA Section
-- Add a visually appealing "Subscribe to our blog" banner between blog grid and footer
-- Connects to the existing `newsletter_subscriptions` table
+## Steps
+
+### Step 1: Create Edge Function
+
+Create `supabase/functions/create-admin/index.ts` that:
+- Uses the service role key to call `supabase.auth.admin.createUser()` with email `jambo@safarihirehub.com`
+- Sets a secure password (you'll provide it)
+- Confirms the email automatically
+- Inserts the `admin` role into `user_roles`
+- Updates the profile with `full_name` and `account_status: 'active'`
+
+### Step 2: Add Config Entry
+
+Add `[functions.create-admin]` with `verify_jwt = false` to `supabase/config.toml` so the function can be called without authentication.
+
+### Step 3: Run the Function
+
+Call the deployed edge function once to create the admin account.
+
+### Step 4: Cleanup
+
+Delete the `create-admin` edge function after successful execution (it's a one-time setup tool).
+
+---
 
 ## Technical Details
 
-### Files Modified
-- **`src/pages/Blog.tsx`** - Restructure layout: extract latest post for featured hero, pass remaining posts to grid, add newsletter CTA section
-- **`src/components/blog/BlogCard.tsx`** - Refine compact card styling with improved image ratio, better spacing, and hover shadow effects
-- **`src/components/blog/FeaturedPost.tsx`** - Already exists and will be integrated into the blog listing page
+The edge function will look like this:
 
-### Files Created
-- **`src/components/blog/NewsletterCTA.tsx`** - New component for newsletter subscription banner with email input and submit button, inserting into `newsletter_subscriptions` table
+```typescript
+// Creates admin user with service role key
+const { data, error } = await supabaseAdmin.auth.admin.createUser({
+  email: "jambo@safarihirehub.com",
+  password: <provided_password>,
+  email_confirm: true,
+  user_metadata: { full_name: "Safari Hire Hub Admin" }
+});
 
-### Data Flow
-- The first post from the query becomes the featured hero post
-- Remaining posts populate the grid below
-- No database changes needed - all existing tables and queries are sufficient
+// Assign admin role
+await supabaseAdmin.from("user_roles").insert({
+  user_id: data.user.id,
+  role: "admin"
+});
+```
+
+## What You Need to Provide
+
+- The password you want for this admin account
 
