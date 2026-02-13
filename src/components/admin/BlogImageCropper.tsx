@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, X, Crop, ZoomIn, ZoomOut } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 
 interface BlogImageCropperProps {
   currentImageUrl: string;
@@ -36,6 +37,7 @@ const BlogImageCropper = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ w: 0, h: 0 });
+  const [isDragOver, setIsDragOver] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,9 +46,7 @@ const BlogImageCropper = ({
   const PREVIEW_W = 600;
   const PREVIEW_H = Math.round(PREVIEW_W / aspectRatio);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Please select an image file", variant: "destructive" });
       return;
@@ -63,8 +63,34 @@ const BlogImageCropper = ({
       setIsCropDialogOpen(true);
     };
     reader.readAsDataURL(file);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   }, [toast]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [processFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  }, [processFile]);
 
   // Load image and draw preview
   useEffect(() => {
@@ -189,10 +215,20 @@ const BlogImageCropper = ({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={cn(
+            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+            isDragOver
+              ? "border-primary bg-primary/10"
+              : "border-border hover:border-primary/50 hover:bg-muted/50"
+          )}
         >
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Click to upload an image</p>
+          <p className="text-sm text-muted-foreground">
+            {isDragOver ? "Drop image here" : "Click or drag & drop an image"}
+          </p>
           <p className="text-xs text-muted-foreground mt-1">
             PNG, JPG, WEBP up to 5MB • Cropped to {aspectRatio === 16 / 9 ? "16:9" : "custom"} ratio
           </p>
