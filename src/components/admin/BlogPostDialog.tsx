@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import RichTextEditor from "@/components/blog/RichTextEditor";
+import BlogImageCropper from "@/components/admin/BlogImageCropper";
 import { Search, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -240,10 +241,12 @@ const BlogPostDialog = ({ open, onOpenChange, post }: BlogPostDialogProps) => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="featured_image_url">Featured Image URL</Label>
-              <Input id="featured_image_url" {...register("featured_image_url")} />
-            </div>
+            <BlogImageCropper
+              currentImageUrl={watch("featured_image_url")}
+              onImageUploaded={(url) => setValue("featured_image_url", url)}
+              label="Featured Image"
+              aspectRatio={16 / 9}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma-separated)</Label>
@@ -358,17 +361,12 @@ const BlogPostDialog = ({ open, onOpenChange, post }: BlogPostDialogProps) => {
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="og_image_url">Open Graph Image URL</Label>
-                  <Input
-                    id="og_image_url"
-                    {...register("og_image_url")}
-                    placeholder="Image for social media sharing (defaults to featured image)"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended size: 1200x630 pixels for optimal social sharing
-                  </p>
-                </div>
+                <BlogImageCropper
+                  currentImageUrl={watch("og_image_url")}
+                  onImageUploaded={(url) => setValue("og_image_url", url)}
+                  label="Open Graph Image"
+                  aspectRatio={1200 / 630}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
